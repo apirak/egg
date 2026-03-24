@@ -10,15 +10,6 @@ import './style.css';
 export function Home() {
 	return (
 		<div class="home-page">
-			<header class="home-header">
-				<div class="header-content">
-					<div>
-						<h1>🥚 Egg Merge</h1>
-						<p class="subtitle">Physics-Based Merge Game</p>
-					</div>
-				</div>
-			</header>
-
 			<main class="home-content">
 				<div class="welcome-section">
 					<div class="logo-section">
