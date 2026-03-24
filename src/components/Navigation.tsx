@@ -1,4 +1,5 @@
 import './Navigation.css';
+import { withBasePath } from '../utils/routes';
 
 export function Navigation() {
 	const menuItems = [
@@ -11,7 +12,7 @@ export function Navigation() {
 		<nav class="main-nav">
 			<div class="nav-container">
 				{menuItems.map((item) => (
-					<a key={item.id} href={item.route} class="nav-link">
+					<a key={item.id} href={withBasePath(item.route)} class="nav-link">
 						<div class="nav-card">
 							<div class="nav-icon">{item.icon}</div>
 							<div class="nav-content">

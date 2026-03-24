@@ -8,8 +8,10 @@ import { Game } from './pages/Game/index';
 import './style.css';
 
 export function App() {
+	const locationScope = typeof window !== 'undefined' ? import.meta.env.BASE_URL : undefined;
+
 	return (
-		<LocationProvider>
+		<LocationProvider scope={locationScope}>
 			<main>
 				<Router>
 					<Route path="/" component={Home} />

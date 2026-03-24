@@ -2,7 +2,8 @@ import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
 
 const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
-const githubPagesBase = "/egg/";
+const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
+const githubPagesBase = repositoryName ? `/${repositoryName}/` : "/";
 
 // https://vitejs.dev/config/
 export default defineConfig({

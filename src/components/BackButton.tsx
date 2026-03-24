@@ -1,4 +1,5 @@
 import './BackButton.css';
+import { withBasePath } from '../utils/routes';
 
 interface BackButtonProps {
 	href?: string;
@@ -22,7 +23,7 @@ export function BackButton({ href = '/', onClick }: BackButtonProps) {
 	}
 
 	return (
-		<a href={href} class="back-button">
+		<a href={withBasePath(href)} class="back-button">
 			{content}
 		</a>
 	);
