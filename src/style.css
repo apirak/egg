@@ -1,10 +1,36 @@
+/**
+ * Global Styles
+ */
+
 :root {
-	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	line-height: 1.5;
 	font-weight: 400;
 
-	color: #222;
-	background-color: #ffffff;
+	/* Design tokens */
+	--color-primary: #667eea;
+	--color-secondary: #764ba2;
+	--color-accent: #e74c3c;
+
+	--color-egg-red: #e74c3c;
+	--color-egg-blue: #3498db;
+	--color-egg-green: #2ecc71;
+
+	--spacing-xs: 4px;
+	--spacing-sm: 8px;
+	--spacing-md: 16px;
+	--spacing-lg: 24px;
+	--spacing-xl: 32px;
+
+	--radius-sm: 4px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+
+	--shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+	--shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+	--shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.15);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -13,8 +39,13 @@
 	-webkit-text-size-adjust: 100%;
 }
 
+* {
+	box-sizing: border-box;
+}
+
 body {
 	margin: 0;
+	padding: 0;
 }
 
 #app {
@@ -23,48 +54,23 @@ body {
 	min-height: 100vh;
 }
 
-header {
-	display: flex;
-	justify-content: flex-end;
-	background-color: #673ab8;
-}
-
+/* Remove old header styles - we use our own components now */
 header nav {
-	display: flex;
+	display: none;
 }
 
-header a {
-	color: #fff;
-	padding: 0.75rem;
-	text-decoration: none;
+/* Smooth transitions */
+a {
+	transition: color 0.2s, background-color 0.2s;
 }
 
-header a.active {
-	background-color: #0005;
+button {
+	font-family: inherit;
+	cursor: pointer;
 }
 
-header a:hover {
-	background-color: #0008;
-}
-
-main {
-	flex: auto;
-	display: flex;
-	align-items: center;
-	max-width: 1280px;
-	margin: 0 auto;
-	text-align: center;
-}
-
-@media (max-width: 639px) {
-	main {
-		margin: 2rem;
-	}
-}
-
-@media (prefers-color-scheme: dark) {
-	:root {
-		color: #ccc;
-		background-color: #1a1a1a;
-	}
+/* Focus styles for accessibility */
+:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
 }

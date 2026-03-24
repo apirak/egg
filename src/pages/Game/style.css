@@ -1,0 +1,50 @@
+.game-page {
+	min-height: 100vh;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.game-placeholder {
+	background: white;
+	border-radius: 20px;
+	padding: 40px;
+	text-align: center;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+	max-width: 400px;
+}
+
+.placeholder-icon {
+	font-size: 4rem;
+	margin-bottom: 20px;
+}
+
+.game-placeholder h1 {
+	font-size: 1.8rem;
+	color: #333;
+	margin: 0 0 12px 0;
+}
+
+.game-placeholder p {
+	color: #666;
+	margin: 0 0 24px 0;
+	line-height: 1.5;
+}
+
+.step-info {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+	margin-bottom: 24px;
+}
+
+.step-badge {
+	background: #f0f0f0;
+	padding: 8px 16px;
+	border-radius: 20px;
+	font-size: 0.85rem;
+	color: #666;
+	font-weight: 500;
+}

@@ -1,0 +1,44 @@
+/* Card Component */
+.card {
+	background: white;
+	border-radius: 12px;
+	transition: all 0.2s;
+}
+
+.card-default {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-elevated {
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-outlined {
+	box-shadow: none;
+	border: 2px solid #e0e0e0;
+}
+
+.card-clickable {
+	cursor: pointer;
+}
+
+.card-clickable:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.card-padding-none {
+	padding: 0;
+}
+
+.card-padding-sm {
+	padding: 12px;
+}
+
+.card-padding-md {
+	padding: 16px;
+}
+
+.card-padding-lg {
+	padding: 24px;
+}

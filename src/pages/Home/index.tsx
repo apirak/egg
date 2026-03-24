@@ -1,45 +1,35 @@
-import preactLogo from '../../assets/preact.svg';
+import { Layout } from '../../design-system';
+import { Navigation } from '../../components/Navigation';
 import './style.css';
 
+/**
+ * Main Menu / Home Page
+ *
+ * Entry point for the Egg Merge Game
+ */
 export function Home() {
 	return (
-		<div class="home">
-			<a href="https://preactjs.com" target="_blank">
-				<img src={preactLogo} alt="Preact logo" height="160" width="160" />
-			</a>
-			<h1>Get Started building Vite-powered Preact Apps </h1>
-			<section>
-				<Resource
-					title="Learn Preact"
-					description="If you're new to Preact, try the interactive tutorial to learn important concepts"
-					href="https://preactjs.com/tutorial"
-				/>
-				<Resource
-					title="Differences to React"
-					description="If you're coming from React, you may want to check out our docs to see where Preact differs"
-					href="https://preactjs.com/guide/v10/differences-to-react"
-				/>
-				<Resource
-					title="Learn Vite"
-					description="To learn more about Vite and how you can customize it to fit your needs, take a look at their excellent documentation"
-					href="https://vitejs.dev"
-				/>
-			</section>
+		<div class="home-page">
+			<header class="home-header">
+				<div class="header-content">
+					<div>
+						<h1>🥚 Egg Merge</h1>
+						<p class="subtitle">Physics-Based Merge Game</p>
+					</div>
+				</div>
+			</header>
+
+			<main class="home-content">
+				<div class="welcome-section">
+					<div class="logo-section">
+						<div class="logo-emoji">🥚</div>
+						<h2>Welcome!</h2>
+						<p>Drop eggs, merge same colors, and collect angels!</p>
+					</div>
+				</div>
+
+				<Navigation />
+			</main>
 		</div>
-	);
-}
-
-interface ResourceProps {
-	title: string;
-	description: string;
-	href: string;
-}
-
-function Resource(props: ResourceProps) {
-	return (
-		<a href={props.href} target="_blank" class="resource">
-			<h2>{props.title}</h2>
-			<p>{props.description}</p>
-		</a>
 	);
 }
