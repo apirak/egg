@@ -47,6 +47,17 @@ export class PhysicsWorld {
     World.add(this.engine.world, egg.body);
   }
 
+  removeEgg(egg: EggEntity): void {
+    this.eggs = this.eggs.filter((item) => item.id !== egg.id);
+    World.remove(this.engine.world, egg.body);
+  }
+
+  removeEggs(eggs: EggEntity[]): void {
+    for (const egg of eggs) {
+      this.removeEgg(egg);
+    }
+  }
+
   getEggs(): EggEntity[] {
     return this.eggs;
   }

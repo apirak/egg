@@ -3,6 +3,8 @@ import { Body, Collision } from 'matter-js';
 import { EggFactory } from '../../game/entities';
 import { GameLoop, PhysicsWorld } from '../../game/core';
 import { GAME_CONFIG } from '../../game/config';
+import { MergeSystem } from '../../game/systems';
+import type { EggColor, EggLevel } from '../../types/egg';
 import './style.css';
 
 /**
@@ -22,6 +24,12 @@ export function Game() {
 
 		const physicsWorld = new PhysicsWorld(cssWidth, cssHeight);
 		const eggFactory = new EggFactory();
+		const mergeSystem = new MergeSystem();
+		const ascendedCount: Record<EggColor, number> = {
+			red: 0,
+			blue: 0,
+			green: 0,
+		};
 
 		const setupCanvas = () => {
 			const rect = main.getBoundingClientRect();
@@ -62,18 +70,68 @@ export function Game() {
 				);
 				ctx.restore();
 			}
+
+			ctx.fillStyle = 'rgba(0, 0, 0, 0.58)';
+			ctx.font = '14px system-ui, sans-serif';
+			ctx.fillText(
+				`Ascended  R:${ascendedCount.red}  B:${ascendedCount.blue}  G:${ascendedCount.green}`,
+				16,
+				24,
+			);
+		};
+
+		const tryMergeOnePair = (): boolean => {
+			const pair = mergeSystem.findMergePair(physicsWorld.getEggs());
+			if (!pair) return false;
+
+			const [a, b] = pair;
+			mergeSystem.markMerged([a.id, b.id]);
+
+			const mergeX = (a.body.position.x + b.body.position.x) / 2;
+			const mergeY = (a.body.position.y + b.body.position.y) / 2;
+
+			physicsWorld.removeEggs([a, b]);
+
+			if (a.level === 5) {
+				ascendedCount[a.color] += 1;
+				return true;
+			}
+
+			const nextLevel = (a.level + 1) as EggLevel;
+			const mergedEgg = eggFactory.createEgg(mergeX, mergeY, nextLevel, a.color);
+			Body.setVelocity(mergedEgg.body, {
+				x: (a.body.velocity.x + b.body.velocity.x) / 2,
+				y: (a.body.velocity.y + b.body.velocity.y) / 2,
+			});
+			Body.setAngularVelocity(mergedEgg.body, (a.body.angularVelocity + b.body.angularVelocity) / 2);
+			physicsWorld.addEgg(mergedEgg);
+
+			return true;
 		};
 
 		const loop = new GameLoop((deltaMs) => {
 			physicsWorld.step(deltaMs);
+			for (let i = 0; i < 2; i++) {
+				if (!tryMergeOnePair()) break;
+			}
 			draw();
 		});
 		loop.start();
 
-		const handlePointerDown = (event: PointerEvent) => {
-			const canvasRect = canvas.getBoundingClientRect();
-			const x = event.clientX - canvasRect.left;
-			const y = event.clientY - canvasRect.top;
+ 		let activePointerId: number | null = null;
+		let pointerX = cssWidth / 2;
+		let pointerY = cssHeight / 2;
+		let rapidFireTimer: number | null = null;
+		const rapidFireIntervalMs = 90;
+
+		const stopRapidFire = () => {
+			if (rapidFireTimer !== null) {
+				window.clearInterval(rapidFireTimer);
+				rapidFireTimer = null;
+			}
+		};
+
+		const spawnEggAt = (x: number, y: number) => {
 			const egg = eggFactory.createEgg(x, y, 1);
 
 			const halfW = egg.displayWidth / 2;
@@ -94,7 +152,42 @@ export function Game() {
 
 			Body.setPosition(egg.body, { x: clampedX, y: candidateY });
 
+			// Small random upward pop so each spawned egg feels alive.
+			const popVX = (Math.random() - 0.5) * 1.8;
+			const popVY = -(1.6 + Math.random() * 1.8);
+			Body.setVelocity(egg.body, { x: popVX, y: popVY });
+			Body.setAngularVelocity(egg.body, (Math.random() - 0.5) * 0.12);
+
 			physicsWorld.addEgg(egg);
+		};
+
+		const updatePointerPosition = (event: PointerEvent) => {
+			const canvasRect = canvas.getBoundingClientRect();
+			pointerX = event.clientX - canvasRect.left;
+			pointerY = event.clientY - canvasRect.top;
+		};
+
+		const handlePointerDown = (event: PointerEvent) => {
+			activePointerId = event.pointerId;
+			canvas.setPointerCapture(event.pointerId);
+			updatePointerPosition(event);
+			spawnEggAt(pointerX, pointerY);
+
+			stopRapidFire();
+			rapidFireTimer = window.setInterval(() => {
+				spawnEggAt(pointerX, pointerY);
+			}, rapidFireIntervalMs);
+		};
+
+		const handlePointerMove = (event: PointerEvent) => {
+			if (activePointerId !== event.pointerId) return;
+			updatePointerPosition(event);
+		};
+
+		const handlePointerUpOrCancel = (event: PointerEvent) => {
+			if (activePointerId !== event.pointerId) return;
+			activePointerId = null;
+			stopRapidFire();
 		};
 
 		const handleResize = () => {
@@ -107,10 +200,17 @@ export function Game() {
 		resizeObserver.observe(main);
 
 		canvas.addEventListener('pointerdown', handlePointerDown);
+		canvas.addEventListener('pointermove', handlePointerMove);
+		canvas.addEventListener('pointerup', handlePointerUpOrCancel);
+		canvas.addEventListener('pointercancel', handlePointerUpOrCancel);
 		window.addEventListener('resize', handleResize);
 
 		return () => {
+			stopRapidFire();
 			canvas.removeEventListener('pointerdown', handlePointerDown);
+			canvas.removeEventListener('pointermove', handlePointerMove);
+			canvas.removeEventListener('pointerup', handlePointerUpOrCancel);
+			canvas.removeEventListener('pointercancel', handlePointerUpOrCancel);
 			window.removeEventListener('resize', handleResize);
 			resizeObserver.disconnect();
 			loop.stop();
