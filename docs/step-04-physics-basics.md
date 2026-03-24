@@ -1,9 +1,11 @@
 # Step 4: Physics-Based Egg Game (No Merging)
 
 ## Overview
+
 Create the basic game with Matter.js physics where eggs spawn on click/tap and roll with realistic physics. No merging logic yet - just physics simulation.
 
 ## Goals
+
 - Set up Matter.js physics world
 - Spawn eggs on click/tap at cursor position
 - Eggs fall and roll with realistic physics
@@ -13,73 +15,90 @@ Create the basic game with Matter.js physics where eggs spawn on click/tap and r
 ## Todo List
 
 ### Physics World Setup
-- [ ] Create `PhysicsWorld` class
-  - [ ] Initialize Matter.js engine
-  - [ ] Set up game boundaries (walls)
-  - [ ] Configure gravity
+
+- [x] Create `PhysicsWorld` class
+  - [x] Initialize Matter.js engine
+  - [x] Set up game boundaries (walls)
+  - [x] Configure gravity
   - [ ] Create renderer for debugging (optional)
-- [ ] Define game container dimensions
-- [ ] Set wall boundaries (left, right, bottom)
+- [x] Define game container dimensions
+- [x] Set wall boundaries (left, right, bottom)
 
 ### Egg Factory
-- [ ] Create `EggFactory` class
-  - [ ] Generate Matter.js compound body for eggs
-  - [ ] Use circleLarge + circleSmall configuration
-  - [ ] Set proper density and friction
-  - [ ] Assign random color (Red, Blue, Green) to new eggs
-- [ ] Create `Egg` entity class
-  - [ ] Store Matter.js body reference
-  - [ ] Store egg type (color, level)
-  - [ ] Store sprite reference
-  - [ ] Update position from physics body
+
+- [x] Create `EggFactory` class
+  - [x] Generate Matter.js compound body for eggs
+  - [x] Use circle-based compound configuration
+  - [x] Set proper density and friction
+  - [x] Assign random color (Red, Blue, Green) to new eggs
+- [x] Create `Egg` entity representation
+  - [x] Store Matter.js body reference
+  - [x] Store egg type (color, level)
+  - [x] Store sprite reference
+  - [x] Keep render dimensions for drawing
 
 ### Game Loop
-- [ ] Create `GameLoop` system
-  - [ ] Update physics engine
-  - [ ] Clear canvas
-  - [ ] Render all egg sprites at body positions
-  - [ ] Handle body rotation
-  - [ ] Maintain 60FPS
+
+- [x] Create `GameLoop` system
+  - [x] Update physics engine
+  - [x] Clear canvas
+  - [x] Render all egg sprites at body positions
+  - [x] Handle body rotation
+  - [x] Maintain 60FPS target
 
 ### Input Handling
-- [ ] Add click/tap handler to game canvas
-  - [ ] Get click coordinates relative to canvas
-  - [ ] Spawn L1 egg at clicked position
-  - [ ] Add to physics world
-- [ ] Prevent spawning outside boundaries
+
+- [x] Add click/tap handler to game canvas
+  - [x] Get click coordinates relative to canvas
+  - [x] Spawn L1 egg at clicked position
+  - [x] Add to physics world
+- [x] Prevent spawning outside boundaries
+- [x] Prevent immediate overlap with existing eggs on spawn
 - [ ] Add visual feedback for spawn position
 
 ### Rendering
-- [ ] Set up main game canvas
-- [ ] Use pre-rendered sprites from Step 2
-- [ ] Draw sprites with proper position and rotation
-- [ ] Handle canvas coordinate system
-- [ ] Optimize for mobile (prevent scrolling)
+
+- [x] Set up main game canvas
+- [x] Use pre-rendered sprites from Step 2
+- [x] Draw sprites with proper position and rotation
+- [x] Handle canvas coordinate system
+- [x] Optimize for mobile (prevent scrolling)
 
 ### Game Page UI
-- [ ] Create `Game` page component
-  - [ ] Set up canvas element
-  - [ ] Initialize physics on mount
-  - [ ] Clean up physics on unmount
-  - [ ] Handle window resize
+
+- [x] Create `Game` page component
+  - [x] Set up canvas element
+  - [x] Initialize physics on mount
+  - [x] Clean up physics on unmount
+  - [x] Handle window resize
 - [ ] Add instructions overlay
-- [ ] Add back to menu button
+- [ ] Add back to menu button (optional UX follow-up)
 
 ### Types
-- [ ] `EggEntity` interface
+
+- [x] `EggEntity` interface
 - [ ] `PhysicsWorldConfig` interface
-- [ ] `GameConfig` interface
+- [x] `GameConfig` interface
 
 ### Testing
-- [ ] Click spawns egg at correct position
-- [ ] Eggs fall with gravity
-- [ ] Eggs roll realistically on surfaces
-- [ ] Eggs don't escape boundaries
-- [ ] Multiple eggs can coexist
-- [ ] TypeScript compiles without errors
-- [ ] Performance is smooth on mobile
+
+- [x] Click spawns egg at correct position
+- [x] Eggs fall with gravity
+- [x] Eggs roll realistically on surfaces
+- [x] Eggs don't escape boundaries
+- [x] Multiple eggs can coexist
+- [x] TypeScript compiles without errors
+- [ ] Performance is smooth on mobile (needs device verification)
+
+## Implementation Notes (Current)
+
+- Physics engine uses Matter.js (`Engine`, `Runner`, `Bodies`, `World`).
+- Solver iterations were increased to reduce body penetration artifacts.
+- Collision body sizing in `EggFactory` was tuned closer to displayed sprite size.
+- Spawn logic now uses click position and performs overlap-avoidance search.
 
 ## File Structure
+
 ```
 src/
   pages/
@@ -100,6 +119,7 @@ src/
 ```
 
 ## Key Constants
+
 ```typescript
 // Game dimensions
 const GAME_WIDTH = 400;
@@ -117,6 +137,7 @@ const SPAWN_LEVEL = 1; // Always spawn L1
 ```
 
 ## Acceptance Criteria
+
 - Click/tap spawns egg at cursor
 - Eggs fall and roll with physics
 - Eggs stay within boundaries

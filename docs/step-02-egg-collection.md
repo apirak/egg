@@ -1,9 +1,11 @@
 # Step 2: Egg Collection Display
 
 ## Overview
+
 Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid layout, showing the complete collection of eggs.
 
 ## Goals
+
 - Display all egg variations (colors and levels)
 - Demonstrate that egg rendering works for all combinations
 - Show size progression between levels
@@ -12,11 +14,13 @@ Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid la
 ## Egg Types to Display
 
 ### Colors (3)
+
 1. Red
 2. Blue
 3. Green
 
 ### Levels (5) - with names
+
 1. Level 1: "General" (smallest)
 2. Level 2: "Dot" (1.2x size multiplier)
 3. Level 3: "Wristband" (1.2x from previous)
@@ -26,54 +30,67 @@ Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid la
 ## Todo List
 
 ### Rendering System
-- [ ] Create `EggConfig` with all 15 egg configurations
-  - [ ] Define color constants (Red, Blue, Green)
-  - [ ] Define level configurations (1-5 with size multipliers)
-  - [ ] Calculate sizes: L1 base, L2 = 1.2x, L3 = 1.44x, L4 = 1.728x, L5 = 2.074x
-- [ ] Enhance `SpriteGenerator` to handle all egg types
-  - [ ] Generate sprites for all color/level combinations
-  - [ ] Cache generated sprites for reuse
-  - [ ] Handle different sizes properly
+
+- [x] Create `EggConfig` with all 15 egg configurations
+  - [x] Define color constants (Red, Blue, Green)
+  - [x] Define level configurations (1-5 with size multipliers)
+  - [x] Calculate sizes: L1 base, L2 = 1.2x, L3 = 1.44x, L4 = 1.728x, L5 = 2.074x
+- [x] Enhance `SpriteGenerator` to handle all egg types
+  - [x] Generate sprites for all color/level combinations
+  - [x] Cache generated sprites for reuse
+  - [x] Handle different sizes properly
 
 ### Collection Page
-- [ ] Create `EggCollection` component/page
-- [ ] Implement grid layout for displaying eggs
-  - [ ] Organize by color (rows or sections)
-  - [ ] Show level progression (1-5 left to right)
-  - [ ] Responsive grid for mobile
-- [ ] Add labels for each egg
-  - [ ] Show level name (e.g., "L2 Dot")
-  - [ ] Show color name
-- [ ] Add visual polish
-  - [ ] Card-style background for each egg
-  - [ ] Hover effects
-  - [ ] Smooth transitions
+
+- [x] Create `EggCollection` component/page
+- [x] Implement grid layout for displaying eggs
+  - [x] Organize by color/level in table layout
+  - [x] Show level progression (L1-L5)
+  - [x] Responsive layout for mobile
+- [x] Add labels for each egg
+  - [x] Show level labels in table rows
+  - [x] Show color labels in table columns
+- [x] Add visual polish
+  - [x] White-focused layout with borders
+  - [x] Clear table alignment and spacing
+  - [x] Smooth rendering behavior
 
 ### Data Structure
-- [ ] Define `EggColor` enum type
-- [ ] Define `EggLevel` enum type (1-5)
-- [ ] Define `EggType` interface (color + level)
-- [ ] Define `EggConfig` data array
+
+- [x] Define `EggColor` type
+- [x] Define `EggLevel` type (1-5)
+- [x] Define `EggType` interface (color + level)
+- [x] Define egg config exports and helpers
 
 ### UI/Routing
-- [ ] Add route `/collection` for this page
-- [ ] Add navigation link to this page
-- [ ] Create page header with title
+
+- [x] Add route `/collection` for this page
+- [x] Add navigation link to this page
+- [x] Create page header with title
 
 ### Types
+
 - [ ] `EggColor`: 'red' | 'blue' | 'green'
 - [ ] `EggLevel`: 1 | 2 | 3 | 4 | 5
 - [ ] `EggType` interface
 - [ ] `EggConfigItem` interface
 
 ### Testing
-- [ ] Verify all 15 eggs render correctly
-- [ ] Check colors are distinct and accurate
-- [ ] Verify size progression is visible
-- [ ] Test responsive layout on different screen sizes
-- [ ] TypeScript compiles without errors
+
+- [x] Verify all 15 eggs render correctly
+- [x] Check colors are distinct and accurate
+- [x] Verify size progression is visible
+- [x] Test responsive layout on different screen sizes
+- [x] TypeScript compiles without errors
+
+## Implementation Notes (Current)
+
+- Collection now shows a table with `Red | Green | Blue` columns and `L1-L5` rows.
+- Collection sprite display uses gameplay size ratio from `EggConfig` to match game scale.
+- Stats bar and old detail panel were removed to simplify the page.
 
 ## File Structure (New)
+
 ```
 src/
   pages/
@@ -87,6 +104,7 @@ src/
 ```
 
 ## Acceptance Criteria
+
 - All 15 eggs are visible
 - Colors are correct (Red, Blue, Green)
 - Size progression is clear (L1 smallest → L5 largest)
