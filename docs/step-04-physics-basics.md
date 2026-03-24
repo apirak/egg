@@ -99,7 +99,7 @@ Create the basic game with Matter.js physics where eggs spawn on click/tap and r
 
 ## File Structure
 
-```
+```text
 src/
   pages/
     Game/
