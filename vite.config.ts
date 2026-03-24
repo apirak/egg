@@ -1,13 +1,18 @@
 import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
 
-const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
-const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
-const githubPagesBase = repositoryName ? `/${repositoryName}/` : "/";
+const configuredBase = process.env.VITE_BASE_PATH;
+
+function normalizeBase(basePath: string): string {
+  const withLeadingSlash = basePath.startsWith("/") ? basePath : `/${basePath}`;
+  return withLeadingSlash.endsWith("/")
+    ? withLeadingSlash
+    : `${withLeadingSlash}/`;
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: isGitHubActions ? githubPagesBase : "/",
+  base: normalizeBase(configuredBase ?? "/"),
   plugins: [
     preact({
       prerender: {
