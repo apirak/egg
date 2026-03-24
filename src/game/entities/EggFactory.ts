@@ -3,6 +3,7 @@ import type { EggColor, EggLevel, EggSprite } from "../../types/egg";
 import { getSpriteGenerator } from "../rendering/SpriteGenerator";
 import {
   EGG_COLORS,
+  pickWeightedEggColor,
   EGG_SIZE_MULTIPLIERS,
   EGG_SPRITE_RENDER_SCALE,
   GAMEPLAY_EGG_SIZE_RATIO,
@@ -79,7 +80,6 @@ export class EggFactory {
   }
 
   private randomColor(): EggColor {
-    const colors = EGG_COLORS;
-    return colors[Math.floor(Math.random() * colors.length)];
+    return pickWeightedEggColor();
   }
 }

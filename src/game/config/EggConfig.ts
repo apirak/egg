@@ -62,6 +62,40 @@ export const EGG_COLORS: EggColor[] = [
 ];
 
 /**
+ * Relative spawn weight for each egg color.
+ * Example: a weight of 6 means the color should appear about 6 times
+ * out of the total combined weight across many spawns.
+ */
+export const EGG_COLOR_WEIGHTS: Record<EggColor, number> = {
+  red: 2,
+  blue: 3,
+  green: 4,
+  yellow: 5,
+  gray: 6,
+};
+
+export const EGG_COLOR_WEIGHT_TOTAL = EGG_COLORS.reduce(
+  (total, color) => total + EGG_COLOR_WEIGHTS[color],
+  0,
+);
+
+export function pickWeightedEggColor(
+  randomValue: number = Math.random(),
+): EggColor {
+  const target = randomValue * EGG_COLOR_WEIGHT_TOTAL;
+  let cumulative = 0;
+
+  for (const color of EGG_COLORS) {
+    cumulative += EGG_COLOR_WEIGHTS[color];
+    if (target < cumulative) {
+      return color;
+    }
+  }
+
+  return EGG_COLORS[EGG_COLORS.length - 1];
+}
+
+/**
  * All possible egg levels
  */
 export const EGG_LEVELS: EggLevel[] = [1, 2, 3, 4, 5, 6];
