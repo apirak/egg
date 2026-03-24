@@ -11,7 +11,8 @@ export const EGG_LEVEL_INFO: Record<
   2: { name: "Dot", description: "Growing pattern" },
   3: { name: "Wristband", description: "Getting stronger" },
   4: { name: "Flash", description: "Almost there" },
-  5: { name: "Golden", description: "Maximum power" },
+  5: { name: "Golden", description: "High tier" },
+  6: { name: "Royal", description: "Maximum power" },
 };
 
 /**
@@ -22,6 +23,8 @@ export const EGG_COLOR_INFO: Record<EggColor, { name: string; emoji: string }> =
     red: { name: "Red", emoji: "🔴" },
     blue: { name: "Blue", emoji: "🔵" },
     green: { name: "Green", emoji: "🟢" },
+    yellow: { name: "Yellow", emoji: "🟡" },
+    gray: { name: "Gray", emoji: "⚪" },
   };
 
 /**
@@ -33,6 +36,7 @@ export const EGG_SIZE_MULTIPLIERS: Record<EggLevel, number> = {
   3: 1.44,
   4: 1.728,
   5: 2.074,
+  6: 2.4888, // 1.2x of level 5 (2.074 * 1.2)
 };
 
 /**
@@ -49,12 +53,18 @@ export const GAMEPLAY_EGG_SIZE_RATIO = 1 / 6;
 /**
  * All possible egg color combinations
  */
-export const EGG_COLORS: EggColor[] = ["red", "blue", "green"];
+export const EGG_COLORS: EggColor[] = [
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "gray",
+];
 
 /**
  * All possible egg levels
  */
-export const EGG_LEVELS: EggLevel[] = [1, 2, 3, 4, 5];
+export const EGG_LEVELS: EggLevel[] = [1, 2, 3, 4, 5, 6];
 
 /**
  * Default egg formula parameters
@@ -67,7 +77,7 @@ export const DEFAULT_EGG_FORMULA = {
 };
 
 /**
- * Generate all egg type combinations (3 colors × 5 levels = 15 total)
+ * Generate all egg type combinations (5 colors × 6 levels = 30 total)
  */
 export function getAllEggTypes(): EggType[] {
   const types: EggType[] = [];
@@ -111,6 +121,6 @@ export function getGameplayEggSize(sizePx: number): number {
 }
 
 /**
- * Egg configuration data for all 15 types
+ * Egg configuration data for all 30 types
  */
 export const ALL_EGG_CONFIGS = getAllEggTypes();

@@ -5,6 +5,7 @@ import { GameLoop, PhysicsWorld } from '../../game/core';
 import { GAME_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
 import type { EggColor, EggLevel } from '../../types/egg';
+import { EGG_COLORS } from '../../game/config/EggConfig';
 import './style.css';
 
 /**
@@ -25,11 +26,10 @@ export function Game() {
 		const physicsWorld = new PhysicsWorld(cssWidth, cssHeight);
 		const eggFactory = new EggFactory();
 		const mergeSystem = new MergeSystem();
-		const ascendedCount: Record<EggColor, number> = {
-			red: 0,
-			blue: 0,
-			green: 0,
-		};
+		const ascendedCount = EGG_COLORS.reduce((acc, color) => {
+			acc[color] = 0;
+			return acc;
+		}, {} as Record<EggColor, number>);
 
 		const setupCanvas = () => {
 			const rect = main.getBoundingClientRect();
@@ -73,8 +73,9 @@ export function Game() {
 
 			ctx.fillStyle = 'rgba(0, 0, 0, 0.58)';
 			ctx.font = '14px system-ui, sans-serif';
+			const ascendedText = EGG_COLORS.map((color) => `${color[0].toUpperCase()}:${ascendedCount[color]}`).join('  ');
 			ctx.fillText(
-				`Ascended  R:${ascendedCount.red}  B:${ascendedCount.blue}  G:${ascendedCount.green}`,
+				`Ascended  ${ascendedText}`,
 				16,
 				24,
 			);
@@ -92,7 +93,7 @@ export function Game() {
 
 			physicsWorld.removeEggs([a, b]);
 
-			if (a.level === 5) {
+			if (a.level === 6) {
 				ascendedCount[a.color] += 1;
 				return true;
 			}

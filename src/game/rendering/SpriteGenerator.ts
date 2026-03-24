@@ -25,21 +25,49 @@ const DEFAULT_RENDER_OPTIONS: Required<Omit<EggRenderOptions, "fillColor">> = {
  */
 export const EGG_COLORS = {
   red: {
-    light: "#ff6b6b",
-    main: "#e74c3c",
-    dark: "#c0392b",
+    light: "#fbaab3",
+    main: "#f87583", // Deep Salmon Pink
+    dark: "#d95f6f",
   },
   blue: {
-    light: "#74b9ff",
-    main: "#3498db",
-    dark: "#2980b9",
+    light: "#74d9ef",
+    main: "#03aad6", // Cerulean Blue
+    dark: "#0289ad",
   },
   green: {
-    light: "#55efc4",
-    main: "#2ecc71",
-    dark: "#27ae60",
+    light: "#bfd96a",
+    main: "#95bb10", // Citrus Green
+    dark: "#708c0c",
+  },
+  yellow: {
+    light: "#fff3a6",
+    main: "#fee759", // Mustard Yellow
+    dark: "#d8c54a",
+  },
+  gray: {
+    light: "#c4c4ba",
+    main: "#9e9e92", // Stardust Gray
+    dark: "#77776f",
   },
 } as const;
+
+const LEVEL6_TWEMOJI = [
+  "🌸",
+  "⭐",
+  "🍀",
+  "🌈",
+  "🧁",
+  "🎉",
+  "🎀",
+  "💎",
+  "🦄",
+  "🐣",
+  "🌼",
+  "✨",
+] as const;
+
+const TWEMOJI_CDN_BASE =
+  "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/";
 
 /**
  * SpriteGenerator class
@@ -52,6 +80,8 @@ export const EGG_COLORS = {
 export class SpriteGenerator {
   private cache: Map<string, EggSprite> = new Map();
 
+  private twemojiLoadCache: Map<string, Promise<HTMLImageElement>> = new Map();
+
   private readonly patternAreaPadding = 4;
 
   private readonly levelPatternOrder: Record<
@@ -59,21 +89,28 @@ export class SpriteGenerator {
     Array<"base" | "band" | "motif" | "accent">
   > = {
     1: ["base"],
-    2: ["band", "motif"],
+    2: ["motif"],
     3: ["band", "motif", "accent"],
     4: ["base", "motif", "accent"],
     5: ["band", "motif", "accent"],
+    6: [],
   };
 
   /**
    * Generate an egg sprite with the given options
    *
    * @param options - Render options including fill color
-   * @param level - Egg level (1-5), affects size (default: 1)
+   * @param level - Egg level (1-6), affects size (default: 1)
    * @returns Pre-rendered egg sprite
    */
   generateSprite(options: EggRenderOptions, level: number = 1): EggSprite {
     const opts = { ...DEFAULT_RENDER_OPTIONS, ...options };
+
+    // Level 6 should feel like a reveal reward, so do not share one cached sprite.
+    if (level === 6) {
+      return this.renderEgg(opts, level);
+    }
+
     const cacheKey = this.getCacheKey(opts, level);
 
     // Check cache first
@@ -93,7 +130,7 @@ export class SpriteGenerator {
    * Get sprite for a specific egg color and level
    *
    * @param color - Egg color ('red', 'blue', 'green')
-   * @param level - Egg level (1-5)
+   * @param level - Egg level (1-6)
    * @param shade - Color shade ('light', 'main', 'dark')
    * @returns Pre-rendered egg sprite
    */
@@ -136,7 +173,7 @@ export class SpriteGenerator {
     level: number,
   ): EggSprite {
     // Get egg configuration with level multiplier
-    const levelKey = Math.max(1, Math.min(5, level)) as EggLevel;
+    const levelKey = Math.max(1, Math.min(6, level)) as EggLevel;
     const levelMultiplier = EGG_SIZE_MULTIPLIERS[levelKey] || 1.0;
     const config: EggParametricConfig = {
       ...DEFAULT_EGG_MATH,
@@ -190,6 +227,10 @@ export class SpriteGenerator {
       level,
       fillColor,
     );
+
+    if (levelKey === 6) {
+      this.drawLevel6Twemoji(ctx, points, centerX, centerY, scale, config);
+    }
 
     return {
       canvas,
@@ -250,6 +291,7 @@ export class SpriteGenerator {
    * L3: Zigzag bands
    * L4: Diagonal stripes + flowers
    * L5: Patchwork festival
+   * L6: Solid color + random Twemoji decals
    */
   private drawLevelPattern(
     ctx: CanvasRenderingContext2D,
@@ -261,7 +303,7 @@ export class SpriteGenerator {
     level: number,
     fillColor: string,
   ): void {
-    if (level === 1) return; // L1 has no pattern
+    if (level === 1 || level === 6) return; // L1/L6 keep a flat fill
 
     ctx.save();
     ctx.translate(centerX, centerY);
@@ -280,7 +322,7 @@ export class SpriteGenerator {
       bottom: config.b + this.patternAreaPadding,
     };
 
-    const levelKey = Math.max(1, Math.min(5, level)) as EggLevel;
+    const levelKey = Math.max(1, Math.min(6, level)) as EggLevel;
     const layers = this.levelPatternOrder[levelKey] ?? [];
 
     for (const layer of layers) {
@@ -308,7 +350,6 @@ export class SpriteGenerator {
     darkColor: string,
   ): void {
     if (level === 2) {
-      if (layer === "band") this.drawLevel2Band(ctx, config, darkColor);
       if (layer === "motif") this.drawLevel2Dots(ctx, config, area, lightColor);
       return;
     }
@@ -323,8 +364,9 @@ export class SpriteGenerator {
 
     if (level === 4) {
       if (layer === "base")
-        this.drawLevel4Stripes(ctx, config, area, lightColor);
-      if (layer === "motif") this.drawLevel4Flowers(ctx, config, darkColor);
+        this.drawLevel4Stripes(ctx, config, area, lightColor, darkColor);
+      if (layer === "motif")
+        this.drawLevel4Flowers(ctx, config, darkColor, lightColor);
       return;
     }
 
@@ -334,31 +376,8 @@ export class SpriteGenerator {
       if (layer === "motif") this.drawLevel5Diamonds(ctx, config, darkColor);
       if (layer === "accent")
         this.drawLevel5StitchesAndConfetti(ctx, config, darkColor);
+      return;
     }
-  }
-
-  /**
-   * Draw dot pattern (L2)
-   */
-  private drawLevel2Band(
-    ctx: CanvasRenderingContext2D,
-    config: EggParametricConfig,
-    darkColor: string,
-  ): void {
-    // Full-width ring band first, then clip keeps only egg interior.
-    ctx.strokeStyle = darkColor;
-    ctx.lineWidth = 2.2;
-    ctx.beginPath();
-    ctx.ellipse(
-      0,
-      config.b * 0.03,
-      config.a * 1.35,
-      config.b * 0.2,
-      0,
-      0,
-      Math.PI * 2,
-    );
-    ctx.stroke();
   }
 
   private drawLevel2Dots(
@@ -367,18 +386,19 @@ export class SpriteGenerator {
     area: { left: number; right: number; top: number; bottom: number },
     lightColor: string,
   ): void {
-    const dotSize = 2.2;
-    const xStep = Math.max(6, config.a * 0.3);
-    const yStep = Math.max(6, config.b * 0.26);
+    // Random polka-dot style (position + size) for L2.
+    const dotCount = Math.max(22, Math.round((config.a * config.b) / 9));
 
-    // Dot field across full rectangular area.
-    ctx.fillStyle = lightColor;
-    for (let y = area.top + yStep * 0.5; y <= area.bottom; y += yStep) {
-      for (let x = area.left + xStep * 0.5; x <= area.right; x += xStep) {
-        ctx.beginPath();
-        ctx.arc(x, y, dotSize, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    for (let i = 0; i < dotCount; i++) {
+      const x = area.left + Math.random() * (area.right - area.left);
+      const y = area.top + Math.random() * (area.bottom - area.top);
+      const radius = 1.1 + Math.random() * 2.6;
+      const alpha = 0.52 + Math.random() * 0.38;
+
+      ctx.fillStyle = this.withAlpha(lightColor, alpha);
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
@@ -454,16 +474,36 @@ export class SpriteGenerator {
     config: EggParametricConfig,
     area: { left: number; right: number; top: number; bottom: number },
     lightColor: string,
+    darkColor: string,
   ): void {
-    // Diagonal stripe set
-    ctx.strokeStyle = lightColor;
-    ctx.lineWidth = config.a * 0.13;
-    for (let i = -6; i <= 6; i++) {
-      const offset = i * config.a * 0.22;
-      ctx.beginPath();
-      ctx.moveTo(area.left + offset, area.top);
-      ctx.lineTo(area.right + offset, area.bottom);
-      ctx.stroke();
+    // Triangle mosaic (connected triangles).
+    const triW = Math.max(8, config.a * 0.42);
+    const triH = Math.max(8, config.b * 0.25);
+    const rows = Math.ceil((area.bottom - area.top) / triH) + 1;
+    const cols = Math.ceil((area.right - area.left) / triW) + 2;
+
+    for (let r = 0; r < rows; r++) {
+      const y = area.top + r * triH;
+      const offsetX = r % 2 === 0 ? 0 : triW / 2;
+
+      for (let c = -1; c < cols; c++) {
+        const x = area.left + c * triW + offsetX;
+        const upward = (r + c) % 2 === 0;
+
+        ctx.beginPath();
+        if (upward) {
+          ctx.moveTo(x, y + triH);
+          ctx.lineTo(x + triW / 2, y);
+          ctx.lineTo(x + triW, y + triH);
+        } else {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + triW / 2, y + triH);
+          ctx.lineTo(x + triW, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = (r + c) % 3 === 0 ? darkColor : lightColor;
+        ctx.fill();
+      }
     }
   }
 
@@ -471,32 +511,35 @@ export class SpriteGenerator {
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
     darkColor: string,
+    lightColor: string,
   ): void {
-    // Flower stamps
-    this.drawFlowerStamp(
-      ctx,
-      -config.a * 0.35,
-      -config.b * 0.25,
-      config.a * 0.09,
-      darkColor,
-      "#ffffff",
-    );
-    this.drawFlowerStamp(
-      ctx,
-      config.a * 0.1,
-      config.b * 0.02,
-      config.a * 0.1,
-      darkColor,
-      "#ffffff",
-    );
-    this.drawFlowerStamp(
-      ctx,
-      config.a * 0.34,
-      config.b * 0.26,
-      config.a * 0.08,
-      darkColor,
-      "#ffffff",
-    );
+    // Accent triangle outlines over the mosaic.
+    ctx.strokeStyle = this.withAlpha(lightColor, 0.85);
+    ctx.lineWidth = 1.4;
+    const accent = [
+      [-0.45, -0.34],
+      [0.05, -0.05],
+      [0.42, 0.28],
+      [-0.22, 0.34],
+    ];
+    for (const [nx, ny] of accent) {
+      const cx = config.a * nx;
+      const cy = config.b * ny;
+      const size = config.a * 0.12;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size);
+      ctx.lineTo(cx + size * 0.9, cy + size * 0.75);
+      ctx.lineTo(cx - size * 0.9, cy + size * 0.75);
+      ctx.closePath();
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = this.withAlpha(darkColor, 0.35);
+    for (const [nx, ny] of accent) {
+      ctx.beginPath();
+      ctx.arc(config.a * nx, config.b * ny, config.a * 0.04, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   /**
@@ -595,6 +638,133 @@ export class SpriteGenerator {
     );
   }
 
+  private drawLevel6Twemoji(
+    ctx: CanvasRenderingContext2D,
+    points: { x: number; y: number }[],
+    centerX: number,
+    centerY: number,
+    scale: number,
+    config: EggParametricConfig,
+  ): void {
+    const slot = {
+      x: 0,
+      y: 0.03,
+      size: 0.62,
+      rotation: (Math.random() - 0.5) * 0.28,
+    };
+
+    const emoji = this.getRandomLevel6Emoji();
+    const twemojiCode = this.toTwemojiCode(emoji);
+    const url = `${TWEMOJI_CDN_BASE}${twemojiCode}.png`;
+
+    this.getTwemojiImage(url)
+      .then((image) => {
+        this.drawTwemojiClipped(
+          ctx,
+          points,
+          centerX,
+          centerY,
+          scale,
+          config,
+          slot,
+          image,
+        );
+      })
+      .catch(() => {
+        this.drawEmojiFallback(
+          ctx,
+          points,
+          centerX,
+          centerY,
+          scale,
+          config,
+          slot,
+          emoji,
+        );
+      });
+  }
+
+  private drawTwemojiClipped(
+    ctx: CanvasRenderingContext2D,
+    points: { x: number; y: number }[],
+    centerX: number,
+    centerY: number,
+    scale: number,
+    config: EggParametricConfig,
+    slot: { x: number; y: number; size: number; rotation: number },
+    image: HTMLImageElement,
+  ): void {
+    const pixelSize = config.a * slot.size * 2;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(scale, scale);
+    this.traceEggPath(ctx, points);
+    ctx.clip();
+
+    ctx.translate(config.a * slot.x, config.b * slot.y);
+    ctx.rotate(slot.rotation);
+    ctx.drawImage(image, -pixelSize / 2, -pixelSize / 2, pixelSize, pixelSize);
+    ctx.restore();
+  }
+
+  private drawEmojiFallback(
+    ctx: CanvasRenderingContext2D,
+    points: { x: number; y: number }[],
+    centerX: number,
+    centerY: number,
+    scale: number,
+    config: EggParametricConfig,
+    slot: { x: number; y: number; size: number; rotation: number },
+    emoji: string,
+  ): void {
+    const fontSize = config.a * slot.size * 2;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(scale, scale);
+    this.traceEggPath(ctx, points);
+    ctx.clip();
+
+    ctx.translate(config.a * slot.x, config.b * slot.y);
+    ctx.rotate(slot.rotation);
+    ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(emoji, 0, 0);
+    ctx.restore();
+  }
+
+  private getRandomLevel6Emoji(): string {
+    const index = Math.floor(Math.random() * LEVEL6_TWEMOJI.length);
+    return LEVEL6_TWEMOJI[index];
+  }
+
+  private toTwemojiCode(emoji: string): string {
+    return Array.from(emoji)
+      .map((char) => char.codePointAt(0)?.toString(16))
+      .filter((code): code is string => Boolean(code) && code !== "fe0f")
+      .join("-");
+  }
+
+  private getTwemojiImage(url: string): Promise<HTMLImageElement> {
+    const cached = this.twemojiLoadCache.get(url);
+    if (cached) {
+      return cached;
+    }
+
+    const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error(`Failed to load Twemoji: ${url}`));
+      image.src = url;
+    });
+
+    this.twemojiLoadCache.set(url, promise);
+    return promise;
+  }
+
   private drawFlowerStamp(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -678,6 +848,14 @@ export class SpriteGenerator {
     const G = Math.max(0, ((num >> 8) & 0x00ff) - amt);
     const B = Math.max(0, (num & 0x0000ff) - amt);
     return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
+  }
+
+  private withAlpha(hexColor: string, alpha: number): string {
+    const clamped = Math.max(0, Math.min(1, alpha));
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${clamped.toFixed(3)})`;
   }
 }
 

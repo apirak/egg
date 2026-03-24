@@ -13,7 +13,7 @@ import './style.css';
 /**
  * Egg Collection Page
  *
- * Displays all 15 egg types (3 colors × 5 levels) in a beautiful grid layout
+ * Displays all 30 egg types (5 colors x 6 levels)
  */
 export function EggCollection() {
 	return (
@@ -33,7 +33,7 @@ export function EggCollection() {
 				{/* Pre-rendered Sprites Section */}
 				<section class="sprites-section">
 					<div class="sprites-container">
-						<h2>🎨 Pre-rendered Sprites (All Colors × Levels)</h2>
+						<h2>🎨 Pre-rendered Sprites (5 Colors x 6 Levels)</h2>
 						<p class="sprites-note">These sprites are generated once and cached for 60FPS performance</p>
 						<SpriteGridView />
 					</div>
@@ -47,9 +47,9 @@ export function EggCollection() {
  * Component to display all egg sprites in a table format
  */
 function SpriteGridView() {
-	const colors: EggColor[] = ['red', 'green', 'blue'];
+	const colors: EggColor[] = EGG_COLORS;
 	const levels: EggLevel[] = EGG_LEVELS;
-	const levelNames = ['', 'L1', 'L2', 'L3', 'L4', 'L5'];
+	const levelNames = ['', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6'];
 
 	return (
 		<table class="sprite-table">
@@ -109,8 +109,35 @@ function SpriteCanvasView({ color, level }: { color: EggColor; level: EggLevel }
 		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 		ctx.imageSmoothingEnabled = true;
 		ctx.imageSmoothingQuality = 'high';
-		ctx.clearRect(0, 0, displayWidth, displayHeight);
-		ctx.drawImage(sprite.canvas, 0, 0, displayWidth, displayHeight);
+
+		const drawSprite = () => {
+			ctx.clearRect(0, 0, displayWidth, displayHeight);
+			ctx.drawImage(sprite.canvas, 0, 0, displayWidth, displayHeight);
+		};
+
+		drawSprite();
+
+		if (level !== 6) return;
+
+		// L6 overlays Twemoji asynchronously, so redraw for a short period.
+		let rafId = 0;
+		const start = performance.now();
+		const maxDurationMs = 1400;
+
+		const refreshUntilLoaded = (time: number) => {
+			drawSprite();
+			if (time - start < maxDurationMs) {
+				rafId = requestAnimationFrame(refreshUntilLoaded);
+			}
+		};
+
+		rafId = requestAnimationFrame(refreshUntilLoaded);
+
+		return () => {
+			if (rafId) {
+				cancelAnimationFrame(rafId);
+			}
+		};
 	}, [color, level]);
 
 	return <canvas ref={canvasRef} class="sprite-canvas" />;

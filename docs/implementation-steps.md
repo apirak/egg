@@ -34,13 +34,13 @@ Create the foundational egg rendering system using compound bodies (two circles)
 
 **File**: [step-02-egg-collection.md](./step-02-egg-collection.md)
 
-Display all 15 egg types (3 colors × 5 levels) with proper size progression.
+Display all 30 egg types (5 colors × 6 levels) with proper size progression.
 
 **Deliverables**:
 
 - `EggConfig` with all egg configurations
 - Complete sprite generation for all types
-- `/collection` page with grid layout
+- `/collection` page with table layout (color columns x level rows)
 
 ### Step 3: Menu Navigation
 
@@ -75,9 +75,9 @@ Implement core merge mechanic for same-color, same-level eggs.
 
 **Deliverables**:
 
-- `CollisionSystem` for detecting collisions
 - `MergeSystem` for merge logic
-- Ascension handling (L5 → Angel)
+- Ascension handling (L6 + L6 → Angel)
+- Reward reveal flow (L5 + L5 → L6 with random Twemoji)
 - Visual effects
 
 ## Progress Tracking
@@ -91,10 +91,12 @@ Implement core merge mechanic for same-color, same-level eggs.
 ## Current Status Snapshot
 
 - Collection page is now table-based (Color columns x Level rows) and uses gameplay size ratio from `EggConfig`.
+- Egg model now uses 5 colors x 6 levels (30 total combinations).
 - UI has been unified to white-focused style across Home, Egg Shape, Collection, and Game pages.
 - Game page now runs real Matter.js physics (spawn, gravity, walls, game loop, rendering).
 - Spawn behavior updated to click position, with boundary clamp and overlap-prevention pass.
 - Egg sprite visual adjustments applied: no stroke and no shadow.
+- Level 6 now renders as solid-color egg with one large random Twemoji, creating a "mystery reward" reveal when L5 eggs merge.
 
 ## Commands
 

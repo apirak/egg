@@ -2,7 +2,7 @@
 
 ## Overview
 
-Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid layout, showing the complete collection of eggs.
+Create a page that displays all 30 egg types (5 colors × 6 levels) in a table layout, showing the complete collection of eggs.
 
 ## Goals
 
@@ -13,28 +13,31 @@ Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid la
 
 ## Egg Types to Display
 
-### Colors (3)
+### Colors (5)
 
 1. Red
 2. Blue
 3. Green
+4. Yellow
+5. Gray
 
-### Levels (5) - with names
+### Levels (6) - with names
 
 1. Level 1: "General" (smallest)
 2. Level 2: "Dot" (1.2x size multiplier)
 3. Level 3: "Wristband" (1.2x from previous)
 4. Level 4: "Flash" (1.2x from previous)
 5. Level 5: "Golden" (1.2x from previous, largest)
+6. Level 6: "Royal" (1.2x from previous)
 
 ## Todo List
 
 ### Rendering System
 
-- [x] Create `EggConfig` with all 15 egg configurations
-  - [x] Define color constants (Red, Blue, Green)
-  - [x] Define level configurations (1-5 with size multipliers)
-  - [x] Calculate sizes: L1 base, L2 = 1.2x, L3 = 1.44x, L4 = 1.728x, L5 = 2.074x
+- [x] Create `EggConfig` with all 30 egg configurations
+  - [x] Define color constants (Red, Blue, Green, Yellow, Gray)
+  - [x] Define level configurations (1-6 with size multipliers)
+  - [x] Calculate sizes: L1 base, L2 = 1.2x, L3 = 1.44x, L4 = 1.728x, L5 = 2.074x, L6 = 2.4888x
 - [x] Enhance `SpriteGenerator` to handle all egg types
   - [x] Generate sprites for all color/level combinations
   - [x] Cache generated sprites for reuse
@@ -45,7 +48,7 @@ Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid la
 - [x] Create `EggCollection` component/page
 - [x] Implement grid layout for displaying eggs
   - [x] Organize by color/level in table layout
-  - [x] Show level progression (L1-L5)
+  - [x] Show level progression (L1-L6)
   - [x] Responsive layout for mobile
 - [x] Add labels for each egg
   - [x] Show level labels in table rows
@@ -70,14 +73,14 @@ Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid la
 
 ### Types
 
-- [ ] `EggColor`: 'red' | 'blue' | 'green'
-- [ ] `EggLevel`: 1 | 2 | 3 | 4 | 5
+- [ ] `EggColor`: 'red' | 'blue' | 'green' | 'yellow' | 'gray'
+- [ ] `EggLevel`: 1 | 2 | 3 | 4 | 5 | 6
 - [ ] `EggType` interface
 - [ ] `EggConfigItem` interface
 
 ### Testing
 
-- [x] Verify all 15 eggs render correctly
+- [x] Verify all 30 eggs render correctly
 - [x] Check colors are distinct and accurate
 - [x] Verify size progression is visible
 - [x] Test responsive layout on different screen sizes
@@ -85,13 +88,14 @@ Create a page that displays all 15 egg types (3 colors × 5 levels) in a grid la
 
 ## Implementation Notes (Current)
 
-- Collection now shows a table with `Red | Green | Blue` columns and `L1-L5` rows.
+- Collection now shows a table with `Red | Blue | Green | Yellow | Gray` columns and `L1-L6` rows.
 - Collection sprite display uses gameplay size ratio from `EggConfig` to match game scale.
 - Stats bar and old detail panel were removed to simplify the page.
+- L6 eggs are solid-color and render one large random Twemoji as the reveal motif.
 
 ## File Structure (New)
 
-```
+```text
 src/
   pages/
     EggCollection/
@@ -105,8 +109,8 @@ src/
 
 ## Acceptance Criteria
 
-- All 15 eggs are visible
-- Colors are correct (Red, Blue, Green)
-- Size progression is clear (L1 smallest → L5 largest)
+- All 30 eggs are visible
+- Colors are correct (Red, Blue, Green, Yellow, Gray)
+- Size progression is clear (L1 smallest → L6 largest)
 - Grid layout is responsive
 - TypeScript compiles cleanly
