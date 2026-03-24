@@ -54,6 +54,17 @@ export class SpriteGenerator {
 
   private readonly patternAreaPadding = 4;
 
+  private readonly levelPatternOrder: Record<
+    EggLevel,
+    Array<"base" | "band" | "motif" | "accent">
+  > = {
+    1: ["base"],
+    2: ["band", "motif"],
+    3: ["band", "motif", "accent"],
+    4: ["base", "motif", "accent"],
+    5: ["band", "motif", "accent"],
+  };
+
   /**
    * Generate an egg sprite with the given options
    *
@@ -269,38 +280,71 @@ export class SpriteGenerator {
       bottom: config.b + this.patternAreaPadding,
     };
 
-    switch (level) {
-      case 2:
-        this.drawDotPattern(ctx, config, area, darkerColor, lighterColor);
-        break;
-      case 3:
-        this.drawWristbandPattern(ctx, config, area, lighterColor, darkerColor);
-        break;
-      case 4:
-        this.drawFlashPattern(ctx, config, area, lighterColor, darkerColor);
-        break;
-      case 5:
-        this.drawGoldenPattern(ctx, config, area, lighterColor, darkerColor);
-        break;
+    const levelKey = Math.max(1, Math.min(5, level)) as EggLevel;
+    const layers = this.levelPatternOrder[levelKey] ?? [];
+
+    for (const layer of layers) {
+      this.drawPatternLayer(
+        ctx,
+        levelKey,
+        layer,
+        config,
+        area,
+        lighterColor,
+        darkerColor,
+      );
     }
 
     ctx.restore();
   }
 
+  private drawPatternLayer(
+    ctx: CanvasRenderingContext2D,
+    level: EggLevel,
+    layer: "base" | "band" | "motif" | "accent",
+    config: EggParametricConfig,
+    area: { left: number; right: number; top: number; bottom: number },
+    lightColor: string,
+    darkColor: string,
+  ): void {
+    if (level === 2) {
+      if (layer === "band") this.drawLevel2Band(ctx, config, darkColor);
+      if (layer === "motif") this.drawLevel2Dots(ctx, config, area, lightColor);
+      return;
+    }
+
+    if (level === 3) {
+      if (layer === "band") this.drawLevel3Bands(ctx, config, area, darkColor);
+      if (layer === "motif")
+        this.drawLevel3Zigzags(ctx, config, area, lightColor);
+      if (layer === "accent") this.drawLevel3AccentDots(ctx, config);
+      return;
+    }
+
+    if (level === 4) {
+      if (layer === "base")
+        this.drawLevel4Stripes(ctx, config, area, lightColor);
+      if (layer === "motif") this.drawLevel4Flowers(ctx, config, darkColor);
+      return;
+    }
+
+    if (level === 5) {
+      if (layer === "band")
+        this.drawLevel5Ribbons(ctx, config, area, lightColor);
+      if (layer === "motif") this.drawLevel5Diamonds(ctx, config, darkColor);
+      if (layer === "accent")
+        this.drawLevel5StitchesAndConfetti(ctx, config, darkColor);
+    }
+  }
+
   /**
    * Draw dot pattern (L2)
    */
-  private drawDotPattern(
+  private drawLevel2Band(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
-    area: { left: number; right: number; top: number; bottom: number },
     darkColor: string,
-    lightColor: string,
   ): void {
-    const dotSize = 2.2;
-    const xStep = Math.max(6, config.a * 0.3);
-    const yStep = Math.max(6, config.b * 0.26);
-
     // Full-width ring band first, then clip keeps only egg interior.
     ctx.strokeStyle = darkColor;
     ctx.lineWidth = 2.2;
@@ -315,6 +359,17 @@ export class SpriteGenerator {
       Math.PI * 2,
     );
     ctx.stroke();
+  }
+
+  private drawLevel2Dots(
+    ctx: CanvasRenderingContext2D,
+    config: EggParametricConfig,
+    area: { left: number; right: number; top: number; bottom: number },
+    lightColor: string,
+  ): void {
+    const dotSize = 2.2;
+    const xStep = Math.max(6, config.a * 0.3);
+    const yStep = Math.max(6, config.b * 0.26);
 
     // Dot field across full rectangular area.
     ctx.fillStyle = lightColor;
@@ -330,11 +385,10 @@ export class SpriteGenerator {
   /**
    * Draw wristband pattern (L3)
    */
-  private drawWristbandPattern(
+  private drawLevel3Bands(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
     area: { left: number; right: number; top: number; bottom: number },
-    lightColor: string,
     darkColor: string,
   ): void {
     const bands = [-config.b * 0.22, config.b * 0.12];
@@ -348,7 +402,18 @@ export class SpriteGenerator {
         area.right - area.left,
         config.b * 0.22,
       );
+    }
+  }
 
+  private drawLevel3Zigzags(
+    ctx: CanvasRenderingContext2D,
+    config: EggParametricConfig,
+    area: { left: number; right: number; top: number; bottom: number },
+    lightColor: string,
+  ): void {
+    const bands = [-config.b * 0.22, config.b * 0.12];
+
+    for (const y of bands) {
       ctx.strokeStyle = lightColor;
       ctx.lineWidth = 1.8;
       ctx.beginPath();
@@ -366,7 +431,12 @@ export class SpriteGenerator {
       }
       ctx.stroke();
     }
+  }
 
+  private drawLevel3AccentDots(
+    ctx: CanvasRenderingContext2D,
+    config: EggParametricConfig,
+  ): void {
     // Accent dots between bands
     ctx.fillStyle = "rgba(255,255,255,0.7)";
     for (let i = -2; i <= 2; i++) {
@@ -379,12 +449,11 @@ export class SpriteGenerator {
   /**
    * Draw flash/lightning pattern (L4)
    */
-  private drawFlashPattern(
+  private drawLevel4Stripes(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
     area: { left: number; right: number; top: number; bottom: number },
     lightColor: string,
-    darkColor: string,
   ): void {
     // Diagonal stripe set
     ctx.strokeStyle = lightColor;
@@ -396,7 +465,13 @@ export class SpriteGenerator {
       ctx.lineTo(area.right + offset, area.bottom);
       ctx.stroke();
     }
+  }
 
+  private drawLevel4Flowers(
+    ctx: CanvasRenderingContext2D,
+    config: EggParametricConfig,
+    darkColor: string,
+  ): void {
     // Flower stamps
     this.drawFlowerStamp(
       ctx,
@@ -427,12 +502,11 @@ export class SpriteGenerator {
   /**
    * Draw golden/sparkle pattern (L5)
    */
-  private drawGoldenPattern(
+  private drawLevel5Ribbons(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
     area: { left: number; right: number; top: number; bottom: number },
     lightColor: string,
-    darkColor: string,
   ): void {
     // Cross ribbons (patchwork style)
     ctx.fillStyle = lightColor;
@@ -448,7 +522,13 @@ export class SpriteGenerator {
       area.right - area.left,
       config.b * 0.36,
     );
+  }
 
+  private drawLevel5StitchesAndConfetti(
+    ctx: CanvasRenderingContext2D,
+    config: EggParametricConfig,
+    darkColor: string,
+  ): void {
     // Ribbon stitches
     ctx.fillStyle = darkColor;
     for (let i = -6; i <= 6; i++) {
@@ -462,6 +542,28 @@ export class SpriteGenerator {
       ctx.fill();
     }
 
+    // Confetti accents (deterministic)
+    const confetti = [
+      [-0.3, -0.08],
+      [0.32, -0.1],
+      [-0.28, 0.12],
+      [0.27, 0.16],
+      [0.0, -0.35],
+      [0.0, 0.35],
+    ];
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    for (const [nx, ny] of confetti) {
+      ctx.beginPath();
+      ctx.arc(config.a * nx, config.b * ny, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  private drawLevel5Diamonds(
+    ctx: CanvasRenderingContext2D,
+    config: EggParametricConfig,
+    darkColor: string,
+  ): void {
     // Symmetric diamonds
     this.drawDiamond(
       ctx,
@@ -491,22 +593,6 @@ export class SpriteGenerator {
       config.a * 0.12,
       darkColor,
     );
-
-    // Confetti accents (deterministic)
-    const confetti = [
-      [-0.3, -0.08],
-      [0.32, -0.1],
-      [-0.28, 0.12],
-      [0.27, 0.16],
-      [0.0, -0.35],
-      [0.0, 0.35],
-    ];
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
-    for (const [nx, ny] of confetti) {
-      ctx.beginPath();
-      ctx.arc(config.a * nx, config.b * ny, 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
   }
 
   private drawFlowerStamp(
