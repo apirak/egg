@@ -1,11 +1,10 @@
-import { Bodies, Composite, Engine, Runner, World } from "matter-js";
+import { Bodies, Composite, Engine, World } from "matter-js";
 import type { Body } from "matter-js";
 import type { EggEntity } from "../entities/EggFactory";
 import { GAME_CONFIG } from "../config/GameConfig";
 
 export class PhysicsWorld {
   private engine: Engine;
-  private runner: Runner;
   private width: number;
   private height: number;
   private walls: Body[] = [];
@@ -20,20 +19,12 @@ export class PhysicsWorld {
 
     this.engine = Engine.create({
       gravity: { x: 0, y: GAME_CONFIG.gravityY },
+      enableSleeping: true,
       positionIterations: 14,
       velocityIterations: 10,
       constraintIterations: 6,
     });
-    this.runner = Runner.create();
     this.buildWalls();
-  }
-
-  start(): void {
-    Runner.run(this.runner, this.engine);
-  }
-
-  stop(): void {
-    Runner.stop(this.runner);
   }
 
   resize(width: number, height: number): void {
@@ -67,7 +58,6 @@ export class PhysicsWorld {
   }
 
   destroy(): void {
-    this.stop();
     this.eggs = [];
     Composite.clear(this.engine.world, false);
     Engine.clear(this.engine);

@@ -5,4 +5,6 @@ export const GAME_CONFIG = {
   wallThickness: 48,
   spawnY: 48,
   fixedDeltaMs: 1000 / 60,
+  maxFrameDeltaMs: 1000 / 20,
+  maxSubsteps: 4,
 };

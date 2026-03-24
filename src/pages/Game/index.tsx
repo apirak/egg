@@ -46,7 +46,6 @@ export function Game() {
 		};
 
 		setupCanvas();
-		physicsWorld.start();
 
 		const draw = () => {
 			const ctx = canvas.getContext('2d');
@@ -110,11 +109,28 @@ export function Game() {
 			return true;
 		};
 
+		let physicsAccumulatorMs = 0;
+
 		const loop = new GameLoop((deltaMs) => {
-			physicsWorld.step(deltaMs);
-			for (let i = 0; i < 2; i++) {
-				if (!tryMergeOnePair()) break;
+			physicsAccumulatorMs += Math.min(deltaMs, GAME_CONFIG.maxFrameDeltaMs);
+
+			let substeps = 0;
+			while (
+				physicsAccumulatorMs >= GAME_CONFIG.fixedDeltaMs &&
+				substeps < GAME_CONFIG.maxSubsteps
+			) {
+				physicsWorld.step(GAME_CONFIG.fixedDeltaMs);
+				for (let i = 0; i < 2; i++) {
+					if (!tryMergeOnePair()) break;
+				}
+				physicsAccumulatorMs -= GAME_CONFIG.fixedDeltaMs;
+				substeps += 1;
 			}
+
+			if (substeps === GAME_CONFIG.maxSubsteps) {
+				physicsAccumulatorMs = Math.min(physicsAccumulatorMs, GAME_CONFIG.fixedDeltaMs);
+			}
+
 			draw();
 		});
 		loop.start();

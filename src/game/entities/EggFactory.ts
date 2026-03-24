@@ -69,10 +69,12 @@ export class EggFactory {
 
     return Bodies.fromVertices(x, y, [vertices], {
       restitution: 0.08,
-      friction: 0.42,
+      friction: 0.55,
+      frictionStatic: 1.4,
       frictionAir: 0.012,
       density: 0.0014,
       slop: 0.01,
+      sleepThreshold: 45,
     });
   }
 
