@@ -3,6 +3,7 @@ import { LocationProvider, Router, Route, hydrate, prerender as ssr } from 'prea
 import { Header } from './components/Header.jsx';
 import { Home } from './pages/Home/index.jsx';
 import { NotFound } from './pages/_404.jsx';
+import { MathEggDemo } from './pages/EggShape/MathDemo';
 import './style.css';
 
 export function App() {
@@ -12,6 +13,7 @@ export function App() {
 			<main>
 				<Router>
 					<Route path="/" component={Home} />
+					<Route path="/egg-shape" component={MathEggDemo} />
 					<Route default component={NotFound} />
 				</Router>
 			</main>
@@ -20,9 +22,12 @@ export function App() {
 }
 
 if (typeof window !== 'undefined') {
-	hydrate(<App />, document.getElementById('app'));
+	const root = document.getElementById('app');
+	if (root) {
+		hydrate(<App />, root);
+	}
 }
 
-export async function prerender(data) {
-	return await ssr(<App {...data} />);
+export async function prerender(data: unknown) {
+	return await ssr(<App {...(data as Record<string, unknown>)} />);
 }

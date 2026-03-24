@@ -29,7 +29,13 @@ export function Home() {
 	);
 }
 
-function Resource(props) {
+interface ResourceProps {
+	title: string;
+	description: string;
+	href: string;
+}
+
+function Resource(props: ResourceProps) {
 	return (
 		<a href={props.href} target="_blank" class="resource">
 			<h2>{props.title}</h2>
