@@ -86,7 +86,27 @@ Implement core merge mechanic for same-color, same-level eggs.
 - [x] Step 2: Egg Collection Display
 - [x] Step 3: Menu Navigation
 - [x] Step 4: Physics Basics
-- [ ] Step 5: Merge Logic
+- [~] Step 5: Merge Logic
+
+## Current Development Plan
+
+### Stabilize Core Gameplay
+
+- Finalize dense-stack physics behavior in narrow play areas
+- Keep spawn behavior readable while avoiding excessive overlap and jitter
+- Tune merge timing so valid same-level collisions feel responsive without chain-merging unpredictably
+
+### Complete Gameplay Loop
+
+- Add proper ascension reward flow beyond simple count increments
+- Define loss or overflow conditions when stacks reach unsafe height
+- Decide whether to add queue or preview logic for upcoming eggs
+
+### Testing and Hardening
+
+- Add unit tests for deterministic game logic modules before expanding gameplay surface
+- Keep rendering code thin and move pure decision logic into testable helpers where needed
+- Add regression coverage for weighted color spawning and merge eligibility rules
 
 ## Current Status Snapshot
 
@@ -95,8 +115,17 @@ Implement core merge mechanic for same-color, same-level eggs.
 - UI has been unified to white-focused style across Home, Egg Shape, Collection, and Game pages.
 - Game page now runs real Matter.js physics (spawn, gravity, walls, game loop, rendering).
 - Spawn behavior updated to click position, with boundary clamp and overlap-prevention pass.
+- Physics stepping now uses a fixed timestep accumulator instead of variable per-frame stepping.
+- Matter.js dense stacks were improved with a closer egg collision silhouette, sleeping, higher solver iterations, and higher static friction.
 - Egg sprite visual adjustments applied: no stroke and no shadow.
 - Level 6 now renders as solid-color egg with one large random Twemoji, creating a "mystery reward" reveal when L5 eggs merge.
+- Random egg colors now use configurable weighted probabilities from `EggConfig`.
+
+## Known Gaps
+
+- No automated tests are configured yet.
+- Merge behavior exists, but reward presentation and collection UX are still minimal.
+- Physics tuning is improved but still needs gameplay-level verification under long stacking sessions.
 
 ## Commands
 
