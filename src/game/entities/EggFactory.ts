@@ -47,16 +47,20 @@ export class EggFactory {
     width: number,
     height: number,
   ): Body {
-    const largeRadius = Math.max(5, Math.round(width * 0.28));
-    const smallRadius = Math.max(4, Math.round(width * 0.2));
-    const verticalOffset = Math.max(5, Math.round(height * 0.22));
+    const largeRadius = Math.max(6, Math.round(width * 0.43));
+    const smallRadius = Math.max(5, Math.round(width * 0.33));
+    const verticalOffset = Math.max(4, Math.round(height * 0.18));
 
     const largeCircle = Bodies.circle(
       x,
-      y + verticalOffset * 0.25,
+      y + verticalOffset * 0.35,
       largeRadius,
     );
-    const smallCircle = Bodies.circle(x, y - verticalOffset * 0.5, smallRadius);
+    const smallCircle = Bodies.circle(
+      x,
+      y - verticalOffset * 0.65,
+      smallRadius,
+    );
 
     return Body.create({
       parts: [largeCircle, smallCircle],

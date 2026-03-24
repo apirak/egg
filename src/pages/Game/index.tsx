@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { Body } from 'matter-js';
+import { Body, Collision } from 'matter-js';
 import { EggFactory } from '../../game/entities';
 import { GameLoop, PhysicsWorld } from '../../game/core';
 import { GAME_CONFIG } from '../../game/config';
@@ -10,10 +10,12 @@ import './style.css';
  */
 export function Game() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const mainRef = useRef<HTMLElement>(null);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
-		if (!canvas) return;
+		const main = mainRef.current;
+		if (!canvas || !main) return;
 
 		let cssWidth = GAME_CONFIG.width;
 		let cssHeight = GAME_CONFIG.height;
@@ -22,7 +24,7 @@ export function Game() {
 		const eggFactory = new EggFactory();
 
 		const setupCanvas = () => {
-			const rect = canvas.getBoundingClientRect();
+			const rect = main.getBoundingClientRect();
 			cssWidth = Math.max(1, Math.floor(rect.width));
 			cssHeight = Math.max(1, Math.floor(rect.height));
 
@@ -77,8 +79,20 @@ export function Game() {
 			const halfW = egg.displayWidth / 2;
 			const halfH = egg.displayHeight / 2;
 			const clampedX = Math.max(halfW, Math.min(cssWidth - halfW, x));
-			const clampedY = Math.max(halfH, Math.min(cssHeight - halfH, y));
-			Body.setPosition(egg.body, { x: clampedX, y: clampedY });
+			let candidateY = Math.max(halfH, Math.min(cssHeight - halfH, y));
+			const stepUp = Math.max(4, Math.round(halfH * 0.5));
+
+			for (let i = 0; i < 40; i++) {
+				Body.setPosition(egg.body, { x: clampedX, y: candidateY });
+				const overlaps = physicsWorld
+					.getEggs()
+					.some((existingEgg) => Collision.collides(egg.body, existingEgg.body));
+
+				if (!overlaps) break;
+				candidateY = Math.max(halfH, candidateY - stepUp);
+			}
+
+			Body.setPosition(egg.body, { x: clampedX, y: candidateY });
 
 			physicsWorld.addEgg(egg);
 		};
@@ -87,12 +101,18 @@ export function Game() {
 			setupCanvas();
 		};
 
+		const resizeObserver = new ResizeObserver(() => {
+			setupCanvas();
+		});
+		resizeObserver.observe(main);
+
 		canvas.addEventListener('pointerdown', handlePointerDown);
 		window.addEventListener('resize', handleResize);
 
 		return () => {
 			canvas.removeEventListener('pointerdown', handlePointerDown);
 			window.removeEventListener('resize', handleResize);
+			resizeObserver.disconnect();
 			loop.stop();
 			physicsWorld.destroy();
 		};
@@ -100,7 +120,7 @@ export function Game() {
 
 	return (
 		<div class="game-page">
-			<main class="game-main">
+			<main ref={mainRef} class="game-main">
 				<canvas ref={canvasRef} class="game-canvas" />
 			</main>
 		</div>

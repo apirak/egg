@@ -20,6 +20,9 @@ export class PhysicsWorld {
 
     this.engine = Engine.create({
       gravity: { x: 0, y: GAME_CONFIG.gravityY },
+      positionIterations: 10,
+      velocityIterations: 8,
+      constraintIterations: 4,
     });
     this.runner = Runner.create();
     this.buildWalls();
