@@ -364,3 +364,93 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* Sprites Section */
+.sprites-section {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 30px;
+}
+
+.sprites-container {
+	background: white;
+	border-radius: 16px;
+	padding: 30px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.sprites-container h2 {
+	font-size: 1.5rem;
+	color: #333;
+	margin: 0 0 8px 0;
+}
+
+.sprites-note {
+	color: #888;
+	font-size: 0.9rem;
+	margin: 0 0 24px 0;
+}
+
+.sprite-grid-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.sprite-row {
+	display: flex;
+	gap: 4px;
+}
+
+.sprite-header .sprite-cell {
+	background: #f5f5f5;
+	font-weight: 600;
+	color: #666;
+}
+
+.sprite-cell {
+	min-width: 80px;
+	height: auto;
+	min-height: 80px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	font-size: 0.85rem;
+	padding: 8px;
+}
+
+.sprite.cell.corner {
+	background: transparent;
+}
+
+.sprite-cell.header {
+	background: #f5f5f5;
+}
+
+.sprite-cell.row-header {
+	font-weight: 600;
+	background: white;
+}
+
+.sprite-canvas {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+@media (max-width: 768px) {
+	.sprites-section {
+		padding: 16px;
+	}
+
+	.sprites-container {
+		padding: 16px;
+	}
+
+	.sprite-cell {
+		min-width: 50px;
+		height: 50px;
+		font-size: 0.7rem;
+	}
+}

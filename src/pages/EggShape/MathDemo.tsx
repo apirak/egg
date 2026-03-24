@@ -1,5 +1,6 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { generateEggPoints, eggPointsToPath, DEFAULT_EGG_MATH, type EggParametricConfig, getEggDimensions } from '../../game/geometry/EggGeometryMath';
+import { getSpriteGenerator, EGG_COLORS } from '../../game/rendering/SpriteGenerator';
 import './style.css';
 
 /**
@@ -252,6 +253,122 @@ export function MathEggDemo() {
 					</div>
 				</section>
 			</main>
+
+			{/* Pre-rendered Sprites Section */}
+			<section class="sprites-section">
+				<div class="sprites-container">
+					<h2>🎨 Pre-rendered Sprites (All Colors × Levels)</h2>
+					<p class="sprites-note">These sprites are generated once and cached for 60FPS performance</p>
+					<SpriteGrid />
+				</div>
+			</section>
 		</div>
+	);
+}
+
+/**
+ * Component to display all egg sprites
+ */
+function SpriteGrid() {
+	const canvasRefs = useRef<Map<HTMLCanvasElement, { color: keyof typeof EGG_COLORS; level: number }>>(new Map());
+
+	const colors: Array<{ key: keyof typeof EGG_COLORS; name: string }> = [
+		{ key: 'red', name: 'Red' },
+		{ key: 'blue', name: 'Blue' },
+		{ key: 'green', name: 'Green' },
+	];
+	const levels = [1, 2, 3, 4, 5];
+	const levelNames = ['', 'L1', 'L2', 'L3', 'L4', 'L5'];
+
+	const handleCanvasRef = (canvas: HTMLCanvasElement | null, color: keyof typeof EGG_COLORS, level: number) => {
+		if (canvas) {
+			canvasRefs.current.set(canvas, { color, level });
+			// Immediately draw the sprite
+			const spriteGen = getSpriteGenerator();
+			const sprite = spriteGen.getSpriteForColor(color, level);
+			const ctx = canvas.getContext('2d');
+			if (ctx) {
+				canvas.width = sprite.width;
+				canvas.height = sprite.height;
+				ctx.drawImage(sprite.canvas, 0, 0);
+			}
+		}
+	};
+
+	return (
+		<div class="sprite-grid-wrapper">
+			{/* Header row */}
+			<div class="sprite-row sprite-header">
+				<div class="sprite-cell corner"></div>
+				{levels.map((level) => (
+					<div key={level} class="sprite-cell header">
+						{levelNames[level]} ({level})
+					</div>
+				))}
+			</div>
+
+			{/* Color rows */}
+			{colors.map((color) => (
+				<div key={color.key} class="sprite-row">
+					<div class="sprite-cell row-header" style={{ color: EGG_COLORS[color.key].main }}>
+						{color.name}
+					</div>
+					{levels.map((level) => (
+						<div key={level} class="sprite-cell">
+							<SpriteCanvas
+								color={color.key}
+								level={level}
+								onCanvas={(canvas) => handleCanvasRef(canvas, color.key, level)}
+							/>
+						</div>
+					))}
+				</div>
+			))}
+		</div>
+	);
+}
+
+/**
+ * Individual sprite canvas component
+ */
+function SpriteCanvas({
+	color,
+	level,
+	onCanvas,
+}: {
+	color: keyof typeof EGG_COLORS;
+	level: number;
+	onCanvas?: (canvas: HTMLCanvasElement | null) => void;
+}) {
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const spriteGen = getSpriteGenerator();
+		const sprite = spriteGen.getSpriteForColor(color, level);
+
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
+
+		// Set canvas size to match sprite
+		canvas.width = sprite.width;
+		canvas.height = sprite.height;
+
+		// Draw sprite
+		ctx.drawImage(sprite.canvas, 0, 0);
+
+		// Notify parent
+		if (onCanvas) {
+			onCanvas(canvas);
+		}
+	}, [color, level, onCanvas]);
+
+	return (
+		<canvas
+			ref={canvasRef}
+			class="sprite-canvas"
+		/>
 	);
 }

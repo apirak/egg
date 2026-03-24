@@ -1,0 +1,295 @@
+/* Collection Page */
+.collection-page {
+	min-height: 100vh;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.collection-header {
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10px);
+	padding: 20px 40px;
+	box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.collection-header h1 {
+	font-size: 1.8rem;
+	color: #333;
+	margin: 0 0 6px 0;
+}
+
+.subtitle {
+	color: #666;
+	font-size: 0.9rem;
+	margin: 0;
+}
+
+.header-badge {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 8px 16px;
+	border-radius: 20px;
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+/* Main Content */
+.collection-main {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 30px 20px;
+}
+
+/* Stats Bar */
+.stats-bar {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 30px;
+}
+
+.stat-item {
+	background: white;
+	border-radius: 12px;
+	padding: 20px 30px;
+	text-align: center;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+	flex: 1;
+}
+
+.stat-value {
+	display: block;
+	font-size: 2rem;
+	font-weight: 700;
+	color: #667eea;
+}
+
+.stat-label {
+	display: block;
+	font-size: 0.85rem;
+	color: #888;
+	margin-top: 4px;
+}
+
+/* Collection Grid */
+.collection-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+}
+
+.color-section {
+	background: white;
+	border-radius: 16px;
+	padding: 24px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.color-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding-bottom: 16px;
+	border-bottom: 3px solid;
+	margin-bottom: 20px;
+}
+
+.color-emoji {
+	font-size: 1.5rem;
+}
+
+.color-name {
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: #333;
+}
+
+.level-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	justify-content: center;
+}
+
+.egg-card {
+	background: #f8f9fa;
+	border-radius: 12px;
+	padding: 16px;
+	cursor: pointer;
+	transition: all 0.2s;
+	border: 2px solid transparent;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 100px;
+}
+
+.egg-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.egg-card.selected {
+	border-color: #667eea;
+	background: #f0f4ff;
+}
+
+.egg-visual {
+	position: relative;
+	margin-bottom: 12px;
+}
+
+.egg-canvas {
+	display: block;
+	margin: 0 auto;
+	max-width: none;
+	height: auto;
+}
+
+.level-badge {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background: #333;
+	color: white;
+	font-size: 0.7rem;
+	font-weight: 700;
+	padding: 4px 8px;
+	border-radius: 10px;
+	min-width: 28px;
+	text-align: center;
+}
+
+.egg-info {
+	text-align: center;
+}
+
+.egg-name {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 4px;
+}
+
+.egg-size {
+	font-size: 0.75rem;
+	color: #888;
+}
+
+/* Detail Panel */
+.egg-detail-panel {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 400px;
+	background: white;
+	box-shadow: -5px 0 30px rgba(0, 0, 0, 0.2);
+	z-index: 100;
+	animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+.detail-content {
+	padding: 30px;
+}
+
+.detail-content h2 {
+	font-size: 1.5rem;
+	color: #333;
+	margin: 0 0 8px 0;
+}
+
+.detail-description {
+	color: #666;
+	font-size: 0.95rem;
+	margin: 0 0 24px 0;
+}
+
+.detail-stats {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 24px;
+}
+
+.detail-stat {
+	display: flex;
+	justify-content: space-between;
+	padding: 12px;
+	background: #f8f9fa;
+	border-radius: 8px;
+}
+
+.detail-label {
+	color: #666;
+	font-size: 0.9rem;
+}
+
+.detail-value {
+	color: #333;
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.close-detail-btn {
+	width: 100%;
+	padding: 14px;
+	border: none;
+	background: #f0f0f0;
+	border-radius: 10px;
+	font-size: 1rem;
+	color: #666;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-weight: 600;
+}
+
+.close-detail-btn:hover {
+	background: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+	.level-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media (max-width: 768px) {
+	.header-content {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.header-badge {
+		align-self: flex-start;
+	}
+
+	.stats-bar {
+		flex-direction: column;
+	}
+
+	.level-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.egg-detail-panel {
+		width: 100%;
+	}
+}
