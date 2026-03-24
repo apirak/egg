@@ -52,6 +52,8 @@ export const EGG_COLORS = {
 export class SpriteGenerator {
   private cache: Map<string, EggSprite> = new Map();
 
+  private readonly patternAreaPadding = 4;
+
   /**
    * Generate an egg sprite with the given options
    *
@@ -171,14 +173,12 @@ export class SpriteGenerator {
       ctx,
       centerX,
       centerY,
+      points,
       config,
       scale,
       level,
       fillColor,
     );
-
-    // Add highlight
-    this.addHighlight(ctx, centerX, centerY, config, scale);
 
     return {
       canvas,
@@ -218,18 +218,8 @@ export class SpriteGenerator {
 
     ctx.closePath();
 
-    // Create gradient fill
-    const gradient = ctx.createLinearGradient(
-      0,
-      DEFAULT_EGG_MATH.b,
-      0,
-      -DEFAULT_EGG_MATH.b,
-    );
-    gradient.addColorStop(0, fillColor);
-    gradient.addColorStop(0.5, this.lightenColor(fillColor, 20));
-    gradient.addColorStop(1, this.darkenColor(fillColor, 15));
-
-    ctx.fillStyle = gradient;
+    // Flat fill color (no gradient)
+    ctx.fillStyle = fillColor;
     ctx.fill();
 
     // Add subtle stroke
@@ -243,52 +233,18 @@ export class SpriteGenerator {
   }
 
   /**
-   * Add highlight/shine to the egg
-   */
-  private addHighlight(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    config: EggParametricConfig,
-    scale: number,
-  ): void {
-    ctx.save();
-    ctx.translate(centerX, centerY);
-
-    // Highlight position (upper left area)
-    const highlightX = -config.a * 0.25 * scale;
-    const highlightY = -config.b * 0.5 * scale;
-    const highlightRx = config.a * 0.18 * scale;
-    const highlightRy = config.b * 0.2 * scale;
-
-    ctx.beginPath();
-    ctx.ellipse(
-      highlightX,
-      highlightY,
-      highlightRx,
-      highlightRy,
-      -0.15,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  /**
    * Draw level-specific pattern on the egg
-   * L1: Plain (no pattern)
-   * L2: Dots
-   * L3: Wristband (horizontal bands)
-   * L4: Flash (lightning bolt)
-   * L5: Golden (sparkles/glow)
+   * L1: Solid
+   * L2: Dots + ring band
+   * L3: Zigzag bands
+   * L4: Diagonal stripes + flowers
+   * L5: Patchwork festival
    */
   private drawLevelPattern(
     ctx: CanvasRenderingContext2D,
     centerX: number,
     centerY: number,
+    points: { x: number; y: number }[],
     config: EggParametricConfig,
     scale: number,
     level: number,
@@ -300,21 +256,31 @@ export class SpriteGenerator {
     ctx.translate(centerX, centerY);
     ctx.scale(scale, scale);
 
+    // Keep all pattern paint inside the egg silhouette.
+    this.traceEggPath(ctx, points);
+    ctx.clip();
+
     const darkerColor = this.darkenColor(fillColor, 30);
     const lighterColor = this.lightenColor(fillColor, 40);
+    const area = {
+      left: -config.a - this.patternAreaPadding,
+      right: config.a + this.patternAreaPadding,
+      top: -config.b - this.patternAreaPadding,
+      bottom: config.b + this.patternAreaPadding,
+    };
 
     switch (level) {
-      case 2: // Dots
-        this.drawDotPattern(ctx, config, darkerColor);
+      case 2:
+        this.drawDotPattern(ctx, config, area, darkerColor, lighterColor);
         break;
-      case 3: // Wristband
-        this.drawWristbandPattern(ctx, config, lighterColor, darkerColor);
+      case 3:
+        this.drawWristbandPattern(ctx, config, area, lighterColor, darkerColor);
         break;
-      case 4: // Flash
-        this.drawFlashPattern(ctx, config, lighterColor);
+      case 4:
+        this.drawFlashPattern(ctx, config, area, lighterColor, darkerColor);
         break;
-      case 5: // Golden
-        this.drawGoldenPattern(ctx, config, lighterColor);
+      case 5:
+        this.drawGoldenPattern(ctx, config, area, lighterColor, darkerColor);
         break;
     }
 
@@ -327,28 +293,38 @@ export class SpriteGenerator {
   private drawDotPattern(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
-    color: string,
+    area: { left: number; right: number; top: number; bottom: number },
+    darkColor: string,
+    lightColor: string,
   ): void {
-    const dotSize = 3;
-    const dotCount = 8;
-    const radius = config.a * 0.5;
+    const dotSize = 2.2;
+    const xStep = Math.max(6, config.a * 0.3);
+    const yStep = Math.max(6, config.b * 0.26);
 
-    ctx.fillStyle = color;
-
-    for (let i = 0; i < dotCount; i++) {
-      const angle = (i / dotCount) * Math.PI * 2;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius * 0.6;
-
-      ctx.beginPath();
-      ctx.arc(x, y, dotSize, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Center dot
+    // Full-width ring band first, then clip keeps only egg interior.
+    ctx.strokeStyle = darkColor;
+    ctx.lineWidth = 2.2;
     ctx.beginPath();
-    ctx.arc(0, 0, dotSize * 1.2, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.ellipse(
+      0,
+      config.b * 0.03,
+      config.a * 1.35,
+      config.b * 0.2,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    ctx.stroke();
+
+    // Dot field across full rectangular area.
+    ctx.fillStyle = lightColor;
+    for (let y = area.top + yStep * 0.5; y <= area.bottom; y += yStep) {
+      for (let x = area.left + xStep * 0.5; x <= area.right; x += xStep) {
+        ctx.beginPath();
+        ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
 
   /**
@@ -357,38 +333,47 @@ export class SpriteGenerator {
   private drawWristbandPattern(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
+    area: { left: number; right: number; top: number; bottom: number },
     lightColor: string,
     darkColor: string,
   ): void {
-    const bandWidth = 6;
-    const bandY = -config.b * 0.2;
+    const bands = [-config.b * 0.22, config.b * 0.12];
 
-    // Main band
-    ctx.fillStyle = darkColor;
-    ctx.beginPath();
-    ctx.ellipse(0, bandY, config.a * 0.85, bandWidth, 0, 0, Math.PI * 2);
-    ctx.fill();
+    for (const y of bands) {
+      // Paint full horizontal strip then crop with egg mask.
+      ctx.fillStyle = darkColor;
+      ctx.fillRect(
+        area.left,
+        y - config.b * 0.11,
+        area.right - area.left,
+        config.b * 0.22,
+      );
 
-    // Highlight on band
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.beginPath();
-    ctx.ellipse(
-      0,
-      bandY - 1,
-      config.a * 0.85,
-      bandWidth * 0.3,
-      0,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
+      ctx.strokeStyle = lightColor;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      const left = area.left;
+      const right = area.right;
+      const step = (right - left) / 10;
+      let x = left;
+      ctx.moveTo(x, y);
+      for (let i = 0; i < 10; i++) {
+        const nextX = x + step;
+        const peakY = i % 2 === 0 ? y - config.b * 0.045 : y + config.b * 0.045;
+        ctx.lineTo((x + nextX) / 2, peakY);
+        ctx.lineTo(nextX, y);
+        x = nextX;
+      }
+      ctx.stroke();
+    }
 
-    // Secondary band
-    const bandY2 = config.b * 0.1;
-    ctx.fillStyle = darkColor;
-    ctx.beginPath();
-    ctx.ellipse(0, bandY2, config.a * 0.6, bandWidth * 0.7, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Accent dots between bands
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    for (let i = -2; i <= 2; i++) {
+      ctx.beginPath();
+      ctx.arc(i * config.a * 0.2, -config.b * 0.02, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   /**
@@ -397,28 +382,46 @@ export class SpriteGenerator {
   private drawFlashPattern(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
-    color: string,
+    area: { left: number; right: number; top: number; bottom: number },
+    lightColor: string,
+    darkColor: string,
   ): void {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    // Diagonal stripe set
+    ctx.strokeStyle = lightColor;
+    ctx.lineWidth = config.a * 0.13;
+    for (let i = -6; i <= 6; i++) {
+      const offset = i * config.a * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(area.left + offset, area.top);
+      ctx.lineTo(area.right + offset, area.bottom);
+      ctx.stroke();
+    }
 
-    // Lightning bolt shape
-    ctx.beginPath();
-    ctx.moveTo(-config.a * 0.3, -config.b * 0.5);
-    ctx.lineTo(0, -config.b * 0.2);
-    ctx.lineTo(-config.a * 0.15, -config.b * 0.1);
-    ctx.lineTo(config.a * 0.2, config.b * 0.3);
-    ctx.lineTo(0, config.b * 0.1);
-    ctx.lineTo(config.a * 0.15, 0);
-    ctx.closePath();
-    ctx.stroke();
-
-    // Glow effect
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.lineWidth = 6;
-    ctx.stroke();
+    // Flower stamps
+    this.drawFlowerStamp(
+      ctx,
+      -config.a * 0.35,
+      -config.b * 0.25,
+      config.a * 0.09,
+      darkColor,
+      "#ffffff",
+    );
+    this.drawFlowerStamp(
+      ctx,
+      config.a * 0.1,
+      config.b * 0.02,
+      config.a * 0.1,
+      darkColor,
+      "#ffffff",
+    );
+    this.drawFlowerStamp(
+      ctx,
+      config.a * 0.34,
+      config.b * 0.26,
+      config.a * 0.08,
+      darkColor,
+      "#ffffff",
+    );
   }
 
   /**
@@ -427,78 +430,144 @@ export class SpriteGenerator {
   private drawGoldenPattern(
     ctx: CanvasRenderingContext2D,
     config: EggParametricConfig,
-    color: string,
+    area: { left: number; right: number; top: number; bottom: number },
+    lightColor: string,
+    darkColor: string,
   ): void {
-    // Sparkles
-    const sparkleCount = 12;
-    const sparkleSize = 4;
+    // Cross ribbons (patchwork style)
+    ctx.fillStyle = lightColor;
+    ctx.fillRect(
+      -config.a * 0.22,
+      area.top,
+      config.a * 0.44,
+      area.bottom - area.top,
+    );
+    ctx.fillRect(
+      area.left,
+      -config.b * 0.18,
+      area.right - area.left,
+      config.b * 0.36,
+    );
 
-    for (let i = 0; i < sparkleCount; i++) {
-      const angle = (i / sparkleCount) * Math.PI * 2;
-      const distance = config.a * (0.3 + Math.random() * 0.4);
-      const x = Math.cos(angle) * distance;
-      const y = (Math.random() - 0.5) * config.b * 0.6;
-
-      // Draw sparkle (star shape)
-      this.drawSparkle(ctx, x, y, sparkleSize, color);
+    // Ribbon stitches
+    ctx.fillStyle = darkColor;
+    for (let i = -6; i <= 6; i++) {
+      ctx.beginPath();
+      ctx.arc(0, i * config.b * 0.12, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (let i = -5; i <= 5; i++) {
+      ctx.beginPath();
+      ctx.arc(i * config.a * 0.16, 0, 1.3, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // Crown-like band at top
-    const bandY = -config.b * 0.3;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-config.a * 0.4, bandY);
-    ctx.quadraticCurveTo(0, bandY - 5, config.a * 0.4, bandY);
-    ctx.stroke();
+    // Symmetric diamonds
+    this.drawDiamond(
+      ctx,
+      -config.a * 0.48,
+      -config.b * 0.42,
+      config.a * 0.12,
+      darkColor,
+    );
+    this.drawDiamond(
+      ctx,
+      config.a * 0.48,
+      -config.b * 0.42,
+      config.a * 0.12,
+      darkColor,
+    );
+    this.drawDiamond(
+      ctx,
+      -config.a * 0.48,
+      config.b * 0.42,
+      config.a * 0.12,
+      darkColor,
+    );
+    this.drawDiamond(
+      ctx,
+      config.a * 0.48,
+      config.b * 0.42,
+      config.a * 0.12,
+      darkColor,
+    );
 
-    // Crown points
-    for (let i = -2; i <= 2; i++) {
-      const px = i * config.a * 0.15;
-      const py = bandY - 3;
-      this.drawSparkle(ctx, px, py, 2, color);
+    // Confetti accents (deterministic)
+    const confetti = [
+      [-0.3, -0.08],
+      [0.32, -0.1],
+      [-0.28, 0.12],
+      [0.27, 0.16],
+      [0.0, -0.35],
+      [0.0, 0.35],
+    ];
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    for (const [nx, ny] of confetti) {
+      ctx.beginPath();
+      ctx.arc(config.a * nx, config.b * ny, 2, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
-  /**
-   * Draw a sparkle/star shape
-   */
-  private drawSparkle(
+  private drawFlowerStamp(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    petalRadius: number,
+    petalColor: string,
+    centerColor: string,
+  ): void {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = petalColor;
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(
+        Math.cos(angle) * petalRadius,
+        Math.sin(angle) * petalRadius,
+        petalRadius * 0.7,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
+    }
+    ctx.fillStyle = centerColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, petalRadius * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  private drawDiamond(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
     size: number,
     color: string,
   ): void {
-    ctx.save();
-    ctx.translate(x, y);
-
-    // Glow
-    ctx.beginPath();
-    ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fill();
-
-    // Star shape
     ctx.fillStyle = color;
     ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      const angle = (i / 4) * Math.PI * 2;
-      const px = Math.cos(angle) * size;
-      const py = Math.sin(angle) * size;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
+    ctx.moveTo(x, y - size);
+    ctx.lineTo(x + size, y);
+    ctx.lineTo(x, y + size);
+    ctx.lineTo(x - size, y);
     ctx.closePath();
     ctx.fill();
+  }
 
-    // Center bright spot
+  private traceEggPath(
+    ctx: CanvasRenderingContext2D,
+    points: { x: number; y: number }[],
+  ): void {
     ctx.beginPath();
-    ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.fill();
-
-    ctx.restore();
+    if (points.length > 0) {
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+    }
+    ctx.closePath();
   }
 
   /**
