@@ -1,7 +1,17 @@
 import { Bodies, Body } from "matter-js";
 import type { EggColor, EggLevel, EggSprite } from "../../types/egg";
 import { getSpriteGenerator } from "../rendering/SpriteGenerator";
-import { EGG_COLORS, getGameplayEggSize } from "../config/EggConfig";
+import {
+  EGG_COLORS,
+  EGG_SIZE_MULTIPLIERS,
+  EGG_SPRITE_RENDER_SCALE,
+  GAMEPLAY_EGG_SIZE_RATIO,
+  getGameplayEggSize,
+} from "../config/EggConfig";
+import {
+  DEFAULT_EGG_MATH,
+  generateEggPoints,
+} from "../geometry/EggGeometryMath";
 
 export interface EggEntity {
   id: string;
@@ -27,7 +37,7 @@ export class EggFactory {
     const displayWidth = getGameplayEggSize(sprite.width);
     const displayHeight = getGameplayEggSize(sprite.height);
 
-    const body = this.createEggBody(x, y, displayWidth, displayHeight);
+    const body = this.createEggBody(x, y, level);
     body.label = "egg";
 
     return {
@@ -41,33 +51,28 @@ export class EggFactory {
     };
   }
 
-  private createEggBody(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-  ): Body {
-    const largeRadius = Math.max(6, Math.round(width * 0.43));
-    const smallRadius = Math.max(5, Math.round(width * 0.33));
-    const verticalOffset = Math.max(4, Math.round(height * 0.18));
-
-    const largeCircle = Bodies.circle(
-      x,
-      y + verticalOffset * 0.35,
-      largeRadius,
+  private createEggBody(x: number, y: number, level: EggLevel): Body {
+    const scale = EGG_SPRITE_RENDER_SCALE * GAMEPLAY_EGG_SIZE_RATIO;
+    const levelScale = EGG_SIZE_MULTIPLIERS[level] ?? 1;
+    const points = generateEggPoints(
+      {
+        ...DEFAULT_EGG_MATH,
+        a: DEFAULT_EGG_MATH.a * levelScale,
+        b: DEFAULT_EGG_MATH.b * levelScale,
+      },
+      28,
     );
-    const smallCircle = Bodies.circle(
-      x,
-      y - verticalOffset * 0.65,
-      smallRadius,
-    );
+    const vertices = points.map((point) => ({
+      x: point.x * scale,
+      y: point.y * scale,
+    }));
 
-    return Body.create({
-      parts: [largeCircle, smallCircle],
-      restitution: 0.18,
-      friction: 0.35,
+    return Bodies.fromVertices(x, y, [vertices], {
+      restitution: 0.08,
+      friction: 0.42,
       frictionAir: 0.012,
       density: 0.0014,
+      slop: 0.01,
     });
   }
 
