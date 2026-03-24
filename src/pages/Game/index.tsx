@@ -1,22 +1,108 @@
-import { BackButton } from '../../components/BackButton';
+import { useEffect, useRef } from 'preact/hooks';
+import { Body } from 'matter-js';
+import { EggFactory } from '../../game/entities';
+import { GameLoop, PhysicsWorld } from '../../game/core';
+import { GAME_CONFIG } from '../../game/config';
 import './style.css';
 
 /**
  * Game Page - Placeholder for Step 4
  */
 export function Game() {
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		let cssWidth = GAME_CONFIG.width;
+		let cssHeight = GAME_CONFIG.height;
+
+		const physicsWorld = new PhysicsWorld(cssWidth, cssHeight);
+		const eggFactory = new EggFactory();
+
+		const setupCanvas = () => {
+			const rect = canvas.getBoundingClientRect();
+			cssWidth = Math.max(1, Math.floor(rect.width));
+			cssHeight = Math.max(1, Math.floor(rect.height));
+
+			const dpr = Math.max(1, window.devicePixelRatio || 1);
+			canvas.width = Math.round(cssWidth * dpr);
+			canvas.height = Math.round(cssHeight * dpr);
+			canvas.style.width = `${cssWidth}px`;
+			canvas.style.height = `${cssHeight}px`;
+
+			physicsWorld.resize(cssWidth, cssHeight);
+		};
+
+		setupCanvas();
+		physicsWorld.start();
+
+		const draw = () => {
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return;
+
+			const dpr = Math.max(1, window.devicePixelRatio || 1);
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+			ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+			const eggs = physicsWorld.getEggs();
+			for (const egg of eggs) {
+				ctx.save();
+				ctx.translate(egg.body.position.x, egg.body.position.y);
+				ctx.rotate(egg.body.angle);
+				ctx.drawImage(
+					egg.sprite.canvas,
+					-egg.displayWidth / 2,
+					-egg.displayHeight / 2,
+					egg.displayWidth,
+					egg.displayHeight,
+				);
+				ctx.restore();
+			}
+		};
+
+		const loop = new GameLoop((deltaMs) => {
+			physicsWorld.step(deltaMs);
+			draw();
+		});
+		loop.start();
+
+		const handlePointerDown = (event: PointerEvent) => {
+			const canvasRect = canvas.getBoundingClientRect();
+			const x = event.clientX - canvasRect.left;
+			const y = event.clientY - canvasRect.top;
+			const egg = eggFactory.createEgg(x, y, 1);
+
+			const halfW = egg.displayWidth / 2;
+			const halfH = egg.displayHeight / 2;
+			const clampedX = Math.max(halfW, Math.min(cssWidth - halfW, x));
+			const clampedY = Math.max(halfH, Math.min(cssHeight - halfH, y));
+			Body.setPosition(egg.body, { x: clampedX, y: clampedY });
+
+			physicsWorld.addEgg(egg);
+		};
+
+		const handleResize = () => {
+			setupCanvas();
+		};
+
+		canvas.addEventListener('pointerdown', handlePointerDown);
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			canvas.removeEventListener('pointerdown', handlePointerDown);
+			window.removeEventListener('resize', handleResize);
+			loop.stop();
+			physicsWorld.destroy();
+		};
+	}, []);
+
 	return (
 		<div class="game-page">
-			<div class="game-placeholder">
-				<div class="placeholder-icon">🎮</div>
-				<h1>Coming Soon!</h1>
-				<p>Game physics and merge logic will be implemented in Steps 4-5.</p>
-				<div class="step-info">
-					<div class="step-badge">Step 4: Physics Basics</div>
-					<div class="step-badge">Step 5: Merge Logic</div>
-				</div>
-				<BackButton />
-			</div>
+			<main class="game-main">
+				<canvas ref={canvasRef} class="game-canvas" />
+			</main>
 		</div>
 	);
 }
