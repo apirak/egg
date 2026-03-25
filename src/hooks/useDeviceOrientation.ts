@@ -21,9 +21,11 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
 	if (!serviceRef.current) {
 		serviceRef.current = new DeviceOrientationService({
 			onOrientationChange: (data) => {
+				console.log('[useDeviceOrientation] Received orientation:', data);
 				setOrientation(data);
 			},
 			onPermissionChange: (state) => {
+				console.log('[useDeviceOrientation] Permission changed:', state);
 				setPermissionState(state);
 			},
 		});

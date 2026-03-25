@@ -60,10 +60,11 @@ export class DeviceOrientationService {
 	start(): void {
 		if (this.isActive) return;
 		if (this.permissionState !== 'granted') {
-			console.warn('Cannot start: permission not granted');
+			console.warn('[DeviceOrientationService] Cannot start: permission not granted');
 			return;
 		}
 
+		console.log('[DeviceOrientationService] Starting orientation listener');
 		this.isActive = true;
 		window.addEventListener('deviceorientation', this.handleOrientation);
 	}
@@ -104,6 +105,13 @@ export class DeviceOrientationService {
 
 		const gravityX = clampedGamma * config.gravityScale;
 		const gravityY = clampedBeta * config.gravityScale;
+
+		// Debug log
+		console.log('[DeviceOrientationService] Orientation:', {
+			raw: { beta: event.beta.toFixed(1), gamma: event.gamma.toFixed(1) },
+			processed: { beta: clampedBeta.toFixed(1), gamma: clampedGamma.toFixed(1) },
+			gravity: { x: gravityX.toFixed(3), y: gravityY.toFixed(3) },
+		});
 
 		this.callbacks.onOrientationChange?.({
 			beta: this.currentBeta,

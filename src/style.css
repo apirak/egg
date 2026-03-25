@@ -46,12 +46,25 @@
 body {
 	margin: 0;
 	padding: 0;
+	/* Prevent zoom and unwanted gestures */
+	touch-action: pan-x pan-y;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+	/* Fix iOS viewport height issue */
+	height: 100vh;
+	height: 100dvh; /* Dynamic viewport height for mobile browsers */
+	overflow: hidden;
 }
 
 #app {
 	display: flex;
 	flex-direction: column;
-	min-height: 100vh;
+	height: 100vh;
+	height: 100dvh; /* Dynamic viewport height for mobile browsers */
+	overflow: hidden;
+	/* Prevent pinch-to-zoom */
+	touch-action: pan-x pan-y;
 }
 
 /* Remove old header styles - we use our own components now */

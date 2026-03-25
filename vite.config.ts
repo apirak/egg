@@ -13,6 +13,10 @@ function normalizeBase(basePath: string): string {
 // https://vitejs.dev/config/
 export default defineConfig({
   base: normalizeBase(configuredBase ?? "/"),
+  server: {
+    port: 4444,
+    allowedHosts: ['local.uxinthai.com'],
+  },
   plugins: [
     preact({
       prerender: {

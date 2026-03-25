@@ -16,6 +16,7 @@ export function Game() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const mainRef = useRef<HTMLElement>(null);
 	const physicsWorldRef = useRef<PhysicsWorld | null>(null);
+	const orientationRef = useRef<{ beta: number; gamma: number; gravityX: number; gravityY: number } | null>(null);
 
 	const {
 		orientation,
@@ -26,11 +27,25 @@ export function Game() {
 		toggle: toggleTilt,
 	} = useDeviceOrientation();
 
+	// Keep orientation ref updated for draw function
+	useEffect(() => {
+		orientationRef.current = orientation;
+	}, [orientation]);
+
 	// Update gravity when orientation changes
 	useEffect(() => {
 		const physicsWorld = physicsWorldRef.current;
-		if (!physicsWorld || !tiltEnabled || !orientation) return;
+		if (!physicsWorld || !tiltEnabled || !orientation) {
+			console.log('[Game] Gravity update skipped:', {
+				hasPhysicsWorld: !!physicsWorld,
+				tiltEnabled,
+				hasOrientation: !!orientation,
+				orientation,
+			});
+			return;
+		}
 
+		console.log('[Game] Updating gravity:', orientation.gravityX, orientation.gravityY);
 		physicsWorld.setGravity(orientation.gravityX, orientation.gravityY);
 	}, [orientation, tiltEnabled]);
 
@@ -53,6 +68,26 @@ export function Game() {
 			toggleTilt();
 		}
 	};
+
+	// Auto-enable tilt on mount for supported devices
+	useEffect(() => {
+		if (!tiltSupported) return;
+
+		// For iOS 13+, we need user interaction to request permission
+		// So we'll just prepare it, actual enable happens on first button click
+		// For non-iOS devices, we can auto-start
+		if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
+			const DeviceOrientationEvent = window.DeviceOrientationEvent as any;
+			if (typeof DeviceOrientationEvent.requestPermission !== 'function') {
+				// Non-iOS device - auto-enable
+				requestPermission().then((state) => {
+					if (state === 'granted') {
+						toggleTilt();
+					}
+				});
+			}
+		}
+	}, []); // Run once on mount
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -118,6 +153,103 @@ export function Game() {
 				16,
 				24,
 			);
+
+			// Draw tilt indicator when tilt is supported
+			if (tiltSupported) {
+				drawTiltIndicator(ctx, cssWidth, cssHeight, tiltEnabled, orientationRef.current);
+			}
+		};
+
+		const drawTiltIndicator = (
+			ctx: CanvasRenderingContext2D,
+			width: number,
+			height: number,
+			isEnabled: boolean,
+			orient: { beta: number; gamma: number; gravityX: number; gravityY: number } | null,
+		) => {
+			// Debug log every ~60 frames (once per second)
+			if (Math.random() < 0.016) {
+				console.log('[drawTiltIndicator] Drawing:', {
+					isEnabled,
+					hasOrientation: !!orient,
+					orient,
+				});
+			}
+
+			const centerX = width / 2;
+			const centerY = height / 2;
+			const radius = 40;
+
+			// Background circle
+			ctx.beginPath();
+			ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+			ctx.fillStyle = isEnabled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(200, 200, 200, 0.7)';
+			ctx.fill();
+			ctx.strokeStyle = isEnabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.15)';
+			ctx.lineWidth = 2;
+			ctx.stroke();
+
+			// Direction line based on gravity (only when enabled and has orientation data)
+			if (isEnabled && orient) {
+				const gravityMagnitude = Math.sqrt(orient.gravityX ** 2 + orient.gravityY ** 2);
+				const maxGravity = GAME_CONFIG.tilt.maxTiltAngle * GAME_CONFIG.tilt.gravityScale;
+				const lineLength = (gravityMagnitude / maxGravity) * (radius - 6);
+
+				// Draw direction line
+				if (lineLength > 2) {
+					const angle = Math.atan2(orient.gravityY, orient.gravityX);
+					const endX = centerX + Math.cos(angle) * lineLength;
+					const endY = centerY + Math.sin(angle) * lineLength;
+					const startX = centerX - Math.cos(angle) * lineLength;
+					const startY = centerY - Math.sin(angle) * lineLength;
+
+					ctx.beginPath();
+					ctx.moveTo(startX, startY);
+					ctx.lineTo(endX, endY);
+					ctx.strokeStyle = '#667eea';
+					ctx.lineWidth = 3;
+					ctx.lineCap = 'round';
+					ctx.stroke();
+
+					// Arrow head at end
+					const arrowSize = 6;
+					ctx.beginPath();
+					ctx.moveTo(endX, endY);
+					ctx.lineTo(
+						endX - arrowSize * Math.cos(angle - Math.PI / 6),
+						endY - arrowSize * Math.sin(angle - Math.PI / 6),
+					);
+					ctx.moveTo(endX, endY);
+					ctx.lineTo(
+						endX - arrowSize * Math.cos(angle + Math.PI / 6),
+						endY - arrowSize * Math.sin(angle + Math.PI / 6),
+					);
+					ctx.stroke();
+				}
+			}
+
+			// Center dot "o"
+			ctx.beginPath();
+			ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+			ctx.fillStyle = isEnabled ? '#667eea' : '#999';
+			ctx.fill();
+
+			// Direction labels
+			ctx.font = '12px system-ui, sans-serif';
+			ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+			ctx.textAlign = 'center';
+			ctx.fillText('↓', centerX, centerY + radius + 16); // Down
+			ctx.fillText('↑', centerX, centerY - radius - 8); // Up
+			ctx.textAlign = 'left';
+			ctx.fillText('←', centerX - radius - 8, centerY + 4); // Left
+			ctx.textAlign = 'right';
+			ctx.fillText('→', centerX + radius + 8, centerY + 4); // Right
+
+			// Status text
+			ctx.font = '11px system-ui, sans-serif';
+			ctx.textAlign = 'center';
+			ctx.fillStyle = isEnabled ? 'rgba(102, 126, 234, 0.8)' : 'rgba(150, 150, 150, 0.8)';
+			ctx.fillText(isEnabled ? 'TILT ON' : 'TILT OFF', centerX, centerY + radius + 32);
 		};
 
 		const tryMergeOnePair = (): boolean => {
