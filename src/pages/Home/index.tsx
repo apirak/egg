@@ -1,5 +1,6 @@
 import { Layout } from '../../design-system';
 import { Navigation } from '../../components/Navigation';
+import { withBasePath } from '../../utils/routes';
 import './style.css';
 
 /**
@@ -10,6 +11,9 @@ import './style.css';
 export function Home() {
 	return (
 		<div class="home-page">
+			<a href={withBasePath('/')} class="close-button">
+				<span>✕</span>
+			</a>
 			<main class="home-content">
 				<div class="welcome-section">
 					<div class="logo-section">

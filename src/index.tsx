@@ -15,10 +15,10 @@ export function App() {
 		<LocationProvider scope={locationScope}>
 			<main>
 				<Router>
-					<Route path="/" component={Home} />
+					<Route path="/" component={Game} />
+					<Route path="/menu" component={Home} />
 					<Route path="/egg-shape" component={MathEggDemo} />
 					<Route path="/collection" component={EggCollection} />
-					<Route path="/game" component={Game} />
 					<Route path="/accelerometer" component={Accelerometer} />
 					<Route default component={NotFound} />
 				</Router>

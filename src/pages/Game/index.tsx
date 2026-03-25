@@ -6,6 +6,7 @@ import { GAME_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
 import type { EggLevel } from '../../types/egg';
 import { useDeviceOrientation } from '../../hooks/useDeviceOrientation';
+import { withBasePath } from '../../utils/routes';
 import './style.css';
 
 /**
@@ -391,6 +392,9 @@ export function Game() {
 
 	return (
 		<div class="game-page">
+			<a href={withBasePath('/menu')} class="menu-button">
+				<span>☰</span>
+			</a>
 			<main ref={mainRef} class="game-main">
 				<canvas ref={canvasRef} class="game-canvas" />
 			</main>
