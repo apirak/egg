@@ -4,7 +4,7 @@ import {
   DEFAULT_EGG_MATH,
   type EggParametricConfig,
 } from "../geometry/EggGeometryMath";
-import type { EggSprite, EggRenderOptions } from "../../types/egg";
+import type { EggSprite, EggRenderOptions, EggColor } from "../../types/egg";
 import {
   EGG_SIZE_MULTIPLIERS,
   EGG_SPRITE_RENDER_SCALE,
@@ -51,20 +51,13 @@ export const EGG_COLORS = {
   },
 } as const;
 
-const LEVEL6_TWEMOJI = [
-  "🌸",
-  "⭐",
-  "🍀",
-  "🌈",
-  "🧁",
-  "🎉",
-  "🎀",
-  "💎",
-  "🦄",
-  "🐣",
-  "🌼",
-  "✨",
-] as const;
+const LEVEL6_EMOJI_SETS: Record<EggColor, string[]> = {
+  red: ["👮", "👷", "👨‍🌾", "👨‍🍳", "👨‍⚕️", "👨‍🏫", "👨‍💻", "👨‍🔧"],
+  blue: ["🍔", "🍕", "🍜", "🍣", "🍦", "🍩", "🍰", "🧁"],
+  green: ["🐱", "🐶", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯"],
+  yellow: ["🍎", "🍊", "🍋", "🍇", "🍓", "🍑", "🍒", "🥝"],
+  gray: ["☀️", "🌧️", "⛈️", "❄️", "🌦️️", "☃️", "🌖", "⛅️"],
+};
 
 const TWEMOJI_CDN_BASE =
   "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/";
@@ -103,12 +96,16 @@ export class SpriteGenerator {
    * @param level - Egg level (1-6), affects size (default: 1)
    * @returns Pre-rendered egg sprite
    */
-  generateSprite(options: EggRenderOptions, level: number = 1): EggSprite {
+  generateSprite(
+    options: EggRenderOptions,
+    level: number = 1,
+    color: EggColor = "red",
+  ): EggSprite {
     const opts = { ...DEFAULT_RENDER_OPTIONS, ...options };
 
     // Level 6 should feel like a reveal reward, so do not share one cached sprite.
     if (level === 6) {
-      return this.renderEgg(opts, level);
+      return this.renderEgg(opts, level, color);
     }
 
     const cacheKey = this.getCacheKey(opts, level);
@@ -120,7 +117,7 @@ export class SpriteGenerator {
     }
 
     // Create new sprite
-    const sprite = this.renderEgg(opts, level);
+    const sprite = this.renderEgg(opts, level, color);
     this.cache.set(cacheKey, sprite);
 
     return sprite;
@@ -145,6 +142,7 @@ export class SpriteGenerator {
         strokeColor: EGG_COLORS[color].dark,
       },
       level,
+      color,
     );
   }
 
@@ -171,6 +169,7 @@ export class SpriteGenerator {
   private renderEgg(
     options: Required<EggRenderOptions>,
     level: number,
+    color: EggColor,
   ): EggSprite {
     // Get egg configuration with level multiplier
     const levelKey = Math.max(1, Math.min(6, level)) as EggLevel;
@@ -229,7 +228,15 @@ export class SpriteGenerator {
     );
 
     if (levelKey === 6) {
-      this.drawLevel6Twemoji(ctx, points, centerX, centerY, scale, config);
+      this.drawLevel6Twemoji(
+        ctx,
+        points,
+        centerX,
+        centerY,
+        scale,
+        config,
+        color,
+      );
     }
 
     return {
@@ -645,6 +652,7 @@ export class SpriteGenerator {
     centerY: number,
     scale: number,
     config: EggParametricConfig,
+    color: EggColor,
   ): void {
     const slot = {
       x: 0,
@@ -653,7 +661,7 @@ export class SpriteGenerator {
       rotation: (Math.random() - 0.5) * 0.28,
     };
 
-    const emoji = this.getRandomLevel6Emoji();
+    const emoji = this.getRandomLevel6Emoji(color);
     const twemojiCode = this.toTwemojiCode(emoji);
     const url = `${TWEMOJI_CDN_BASE}${twemojiCode}.png`;
 
@@ -735,9 +743,10 @@ export class SpriteGenerator {
     ctx.restore();
   }
 
-  private getRandomLevel6Emoji(): string {
-    const index = Math.floor(Math.random() * LEVEL6_TWEMOJI.length);
-    return LEVEL6_TWEMOJI[index];
+  private getRandomLevel6Emoji(color: EggColor): string {
+    const emojiSet = LEVEL6_EMOJI_SETS[color];
+    const index = Math.floor(Math.random() * emojiSet.length);
+    return emojiSet[index];
   }
 
   private toTwemojiCode(emoji: string): string {

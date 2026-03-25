@@ -51,20 +51,34 @@ body {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	user-select: none;
-	/* Fix iOS viewport height issue */
-	height: 100vh;
-	height: 100dvh; /* Dynamic viewport height for mobile browsers */
-	overflow: hidden;
+	min-height: 100vh;
+	min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 #app {
 	display: flex;
 	flex-direction: column;
-	height: 100vh;
-	height: 100dvh; /* Dynamic viewport height for mobile browsers */
-	overflow: hidden;
+	min-height: 100vh;
+	min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+	overflow-x: hidden;
+	overflow-y: visible;
 	/* Prevent pinch-to-zoom */
 	touch-action: pan-x pan-y;
+}
+
+body.game-scroll-lock {
+	height: 100vh;
+	height: 100dvh;
+	overflow: hidden;
+	overscroll-behavior: none;
+}
+
+#app.game-scroll-lock {
+	height: 100vh;
+	height: 100dvh;
+	overflow: hidden;
 }
 
 /* Remove old header styles - we use our own components now */

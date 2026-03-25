@@ -98,6 +98,18 @@ export function Game() {
 		physicsWorld.resetGravity();
 	}, [tiltEnabled]);
 
+	// Lock page scroll only while the game page is mounted.
+	useEffect(() => {
+		const appRoot = document.getElementById('app');
+		document.body.classList.add('game-scroll-lock');
+		appRoot?.classList.add('game-scroll-lock');
+
+		return () => {
+			document.body.classList.remove('game-scroll-lock');
+			appRoot?.classList.remove('game-scroll-lock');
+		};
+	}, []);
+
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const main = mainRef.current;
