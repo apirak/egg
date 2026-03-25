@@ -18,6 +18,7 @@ export function Game() {
 	const physicsWorldRef = useRef<PhysicsWorld | null>(null);
 	const orientationRef = useRef<{ beta: number; gamma: number; gravityX: number; gravityY: number } | null>(null);
 	const tiltEnabledRef = useRef(false);
+	const debugSpawnLevel6Ref = useRef<(() => void) | null>(null);
 
 	const [showTiltModal, setShowTiltModal] = useState(false);
 
@@ -291,8 +292,8 @@ export function Game() {
 			}
 		};
 
-		const spawnEggAt = (x: number, y: number) => {
-			const egg = eggFactory.createEgg(x, y, 1);
+		const spawnEggAt = (x: number, y: number, level: EggLevel = 1) => {
+			const egg = eggFactory.createEgg(x, y, level);
 
 			const halfW = egg.displayWidth / 2;
 			const halfH = egg.displayHeight / 2;
@@ -364,6 +365,30 @@ export function Game() {
 			setupCanvas();
 		};
 
+		const spawnRandomLevel6Egg = () => {
+			const margin = 48;
+			const randomX = margin + Math.random() * Math.max(1, cssWidth - margin * 2);
+			const randomY = margin + Math.random() * Math.max(1, cssHeight - margin * 2);
+			spawnEggAt(randomX, randomY, 6);
+		};
+
+		debugSpawnLevel6Ref.current = spawnRandomLevel6Egg;
+
+		const debugSecretCode = 'egg6';
+		let debugInputBuffer = '';
+
+		const handleDebugSpawnShortcut = (event: KeyboardEvent) => {
+			if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+			const key = event.key.toLowerCase();
+			if (key.length !== 1) return;
+
+			debugInputBuffer = `${debugInputBuffer}${key}`.slice(-debugSecretCode.length);
+			if (debugInputBuffer !== debugSecretCode) return;
+
+			debugInputBuffer = '';
+			spawnRandomLevel6Egg();
+		};
+
 		const resizeObserver = new ResizeObserver(() => {
 			setupCanvas();
 		});
@@ -375,8 +400,10 @@ export function Game() {
 		canvas.addEventListener('pointercancel', handlePointerUpOrCancel);
 		canvas.addEventListener('contextmenu', handleContextMenu);
 		window.addEventListener('resize', handleResize);
+		window.addEventListener('keydown', handleDebugSpawnShortcut);
 
 		return () => {
+			debugSpawnLevel6Ref.current = null;
 			stopRapidFire();
 			canvas.removeEventListener('pointerdown', handlePointerDown);
 			canvas.removeEventListener('pointermove', handlePointerMove);
@@ -384,6 +411,7 @@ export function Game() {
 			canvas.removeEventListener('pointercancel', handlePointerUpOrCancel);
 			canvas.removeEventListener('contextmenu', handleContextMenu);
 			window.removeEventListener('resize', handleResize);
+			window.removeEventListener('keydown', handleDebugSpawnShortcut);
 			resizeObserver.disconnect();
 			loop.stop();
 			physicsWorld.destroy();
@@ -397,6 +425,12 @@ export function Game() {
 			</a>
 			<main ref={mainRef} class="game-main">
 				<canvas ref={canvasRef} class="game-canvas" />
+				<button
+					type="button"
+					class="debug-level6-hotspot"
+					aria-label="Debug spawn level 6 egg"
+					onClick={() => debugSpawnLevel6Ref.current?.()}
+				/>
 			</main>
 
 			{/* Tilt Permission Modal */}
