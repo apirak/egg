@@ -14,4 +14,17 @@ export const GAME_CONFIG = {
     deadZone: 3,
     permissionTimeout: 5000,
   },
+  cardReveal: {
+    explosionDurationMs: 360,
+    explosionScale: 1.08,
+    burstEmojiCount: 10,
+    burstDistanceMin: 36,
+    burstDistanceMax: 110,
+    burstDurationMs: 760,
+    cardEntryDurationMs: 520,
+    dismissFlipOutMs: 320,
+    pushRadiusPx: 170,
+    pushForce: 0.012,
+    upwardLiftFactor: 0.35,
+  },
 };

@@ -9,10 +9,12 @@
 **File:** `lib/cardData.ts`
 
 **Goals:**
+
 - กำหนดข้อมูลการ์ดทั้งหมด (40 การ์ด = 5 sets × 8 cards)
 - กำหนด stats, rarity, lore สำหรับแต่ละการ์ด
 
 **Features:**
+
 - [ ] Define Card interface (id, emoji, name, stats, rarity, lore)
 - [ ] Create all 40 card data
 - [ ] Export LEVEL6_EMOJI_SETS
@@ -23,18 +25,18 @@
 ```typescript
 // lib/cardData.ts
 
-export type EggColor = 'red' | 'blue' | 'green' | 'yellow' | 'gray';
-export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+export type EggColor = "red" | "blue" | "green" | "yellow" | "gray";
+export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
 export interface CardStats {
-  focus: number;      // ⚡ สมาธิ
-  endurance: number;  // 🛡️ ความแข็งแกร่ง
-  speed: number;      // 💨 ความเร็ว
-  luck?: number;      // 🍀 โชค (hidden)
+  focus: number; // ⚡ สมาธิ
+  endurance: number; // 🛡️ ความแข็งแกร่ง
+  speed: number; // 💨 ความเร็ว
+  luck?: number; // 🍀 โชค (hidden)
 }
 
 export interface Card {
-  id: string;           // "#001" - "#040"
+  id: string; // "#001" - "#040"
   emoji: string;
   color: EggColor;
   nameTH: string;
@@ -42,7 +44,7 @@ export interface Card {
   stats: CardStats;
   rarity: Rarity;
   lore: string[];
-  ability: string;      // คำอธิบายพลัง
+  ability: string; // คำอธิบายพลัง
 }
 
 // ตัวอย่างการ์ด #003 (Yellow Set - Fruits)
@@ -58,9 +60,9 @@ export const SAMPLE_CARD: Card = {
     "ในคืนที่นักเรียนนั่งอ่านหนังสือจนดึก",
     "รู้สึกหมดแรงและเริ่มจะนอนหลับ...",
     "ส้มลูกนี้ปรากฏกายขึ้น",
-    '"ทานเพียงลูกเดียว สมาธิจะกลับมา"'
+    '"ทานเพียงลูกเดียว สมาธิจะกลับมา"',
   ],
-  ability: "ช่วยให้สมาธิดีขึ้น อ่านหนังสือได้นานขึ้น 30 นาที"
+  ability: "ช่วยให้สมาธิดีขึ้น อ่านหนังสือได้นานขึ้น 30 นาที",
 };
 
 // ตัวอย่างการ์ด Legendary
@@ -77,9 +79,9 @@ export const SAMPLE_LEGENDARY: Card = {
     "จะจำได้ทุกสิ่งที่เคยอ่าน",
     "นักเรียนผู้หนึ่งใช้มาสอบเข้ามหาวิทยาลัย",
     "และได้คะแนนเต็ม... ตั้งแต่นั้นมา",
-    "ไม่มีใครเคยเห็นเมืองทองลูกนั้นอีกเลย"
+    "ไม่มีใครเคยเห็นเมืองทองลูกนั้นอีกเลย",
   ],
-  ability: "จำได้ทุกสิ่งที่อ่าน ความจำไม่ลดลุก นาน 24 ชั่วโมง"
+  ability: "จำได้ทุกสิ่งที่อ่าน ความจำไม่ลดลุก นาน 24 ชั่วโมง",
 };
 
 export const LEVEL6_EMOJI_SETS: Record<EggColor, string[]> = {
@@ -100,11 +102,11 @@ export const ALL_CARDS: Card[] = [
 ];
 
 export function getCardById(id: string): Card | undefined {
-  return ALL_CARDS.find(c => c.id === id);
+  return ALL_CARDS.find((c) => c.id === id);
 }
 
 export function getCardsByColor(color: EggColor): Card[] {
-  return ALL_CARDS.filter(c => c.color === color);
+  return ALL_CARDS.filter((c) => c.color === color);
 }
 ```
 
@@ -115,11 +117,13 @@ export function getCardsByColor(color: EggColor): Card[] {
 **File:** `components/card/Card3D.tsx`
 
 **Goals:**
+
 - สร้าง Component การ์ด 3D ที่หมุนได้
 - แสดงทั้งด้านหน้าและด้านหลัง
 - ใส่เอฟเฟกต์ holographic
 
 **Features:**
+
 - [ ] CSS 3D flip animation
 - [ ] Front side: number, emoji, name, stats, rarity
 - [ ] Back side: lore, ability
@@ -128,16 +132,18 @@ export function getCardsByColor(color: EggColor): Card[] {
 - [ ] Click/hover to flip
 
 **Props:**
+
 ```typescript
 interface Card3DProps {
   card: Card;
   isFlipped?: boolean;
   onFlip?: () => void;
-  showCount?: number;  // แสดงจำนวน (x1, x2, ...)
+  showCount?: number; // แสดงจำนวน (x1, x2, ...)
 }
 ```
 
 **Sample Usage:**
+
 ```tsx
 <Card3D card={SAMPLE_CARD} isFlipped={false} onFlip={() => {}} />
 <Card3D card={SAMPLE_CARD} isFlipped={false} showCount={3} />
@@ -150,11 +156,13 @@ interface Card3DProps {
 **File:** `pages/card-design.tsx`
 
 **Goals:**
+
 - หน้าสำหรับออกแบบและทดสอบการ์ด
 - เลือกดูการ์ดแต่ละใบได้
 - ทดสอบ flip animation
 
 **Features:**
+
 - [ ] Card selector (dropdown หรือ grid)
 - [ ] Display selected card in 3D
 - [ ] Toggle flip button
@@ -162,6 +170,7 @@ interface Card3DProps {
 - [ ] Add to menu navigation
 
 **Preview:**
+
 ```tsx
 // pages/card-design.tsx
 
@@ -174,12 +183,18 @@ export default function CardDesignPage() {
       <h1>Card Design Preview</h1>
 
       <select onChange={(e) => setSelectedCard(getCardById(e.target.value))}>
-        {ALL_CARDS.map(card => (
-          <option value={card.id}>{card.id} - {card.nameTH}</option>
+        {ALL_CARDS.map((card) => (
+          <option value={card.id}>
+            {card.id} - {card.nameTH}
+          </option>
         ))}
       </select>
 
-      <Card3D card={selectedCard} isFlipped={isFlipped} onFlip={() => setIsFlipped(!isFlipped)} />
+      <Card3D
+        card={selectedCard}
+        isFlipped={isFlipped}
+        onFlip={() => setIsFlipped(!isFlipped)}
+      />
 
       <button onClick={() => setIsFlipped(!isFlipped)}>Flip Card</button>
 
@@ -197,17 +212,20 @@ export default function CardDesignPage() {
 **File:** `components/card/CardReveal.tsx`
 
 **Goals:**
+
 - Component แสดงตอนไข่แตกและการ์ดปรากฏ
 - Animation ของ egg crack → light burst → card materialize
 
 **Features:**
-- [ ] Egg crack animation
-- [ ] Light burst/particle effect
-- [ ] Card fade in + scale up
-- [ ] Floating 3D rotation
-- [ ] Tap anywhere to dismiss
+
+- [x] Egg crack animation
+- [x] Light burst/particle effect
+- [x] Card fade in + scale up
+- [x] Floating 3D rotation
+- [x] Tap anywhere to dismiss
 
 **Props:**
+
 ```typescript
 interface CardRevealProps {
   card: Card;
@@ -216,6 +234,7 @@ interface CardRevealProps {
 ```
 
 **Animation Timeline:**
+
 ```
 0ms: Egg starts cracking
 500ms: Egg fully cracks, light bursts
@@ -231,10 +250,12 @@ interface CardRevealProps {
 **File:** `components/card/CardFlight.tsx`
 
 **Goals:**
+
 - Component จัดการ animation การ์ดบินไปยังสมุด
 - Bezier curve path พร้อม sparkle trail
 
 **Features:**
+
 - [ ] Bezier curve flight path
 - [ ] Sparkle/particle trail
 - [ ] Card shrinks as it flies
@@ -242,6 +263,7 @@ interface CardRevealProps {
 - [ ] Save confirmation animation
 
 **Props:**
+
 ```typescript
 interface CardFlightProps {
   card: Card;
@@ -258,11 +280,13 @@ interface CardFlightProps {
 **File:** `components/card/CollectionBook.tsx`
 
 **Goals:**
+
 - Component แสดงสมุดสะสมการ์ด
 - Grid layout 4x2 ต่อชุด
 - Empty slots และ filled slots
 
 **Features:**
+
 - [ ] Grid layout 4x2
 - [ ] Empty slot design (shadow/emboss emoji)
 - [ ] Filled slot with Card3D component
@@ -272,6 +296,7 @@ interface CardFlightProps {
 - [ ] Bonus card slot (locked when incomplete)
 
 **Props:**
+
 ```typescript
 interface CollectionBookProps {
   setColor: EggColor;
@@ -287,11 +312,13 @@ interface CollectionBookProps {
 **File:** `pages/collection-book.tsx`
 
 **Goals:**
+
 - หน้าสมุดสะสมการ์ดหลัก
 - Set navigation (1/5, 2/5, ...)
 - Page flip animation between sets
 
 **Features:**
+
 - [ ] Book background (สีดำ + purple/gold aura)
 - [ ] Set navigation buttons
 - [ ] Page flip animation
@@ -300,24 +327,25 @@ interface CollectionBookProps {
 - [ ] Add to menu navigation
 
 **Preview:**
+
 ```tsx
 // pages/collection-book.tsx
 
 export default function CollectionBookPage() {
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
-  const sets: EggColor[] = ['red', 'blue', 'green', 'yellow', 'gray'];
+  const sets: EggColor[] = ["red", "blue", "green", "yellow", "gray"];
   const collection = getCollection();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
       {/* Header */}
       <div className="flex justify-between items-center p-4">
-        <button onClick={() => setCurrentSetIndex(i => Math.max(0, i - 1))}>
+        <button onClick={() => setCurrentSetIndex((i) => Math.max(0, i - 1))}>
           ← Previous
         </button>
         <h1>Collection Book</h1>
         <span>Set {currentSetIndex + 1}/5</span>
-        <button onClick={() => setCurrentSetIndex(i => Math.min(4, i + 1))}>
+        <button onClick={() => setCurrentSetIndex((i) => Math.min(4, i + 1))}>
           Next →
         </button>
       </div>
@@ -344,11 +372,13 @@ export default function CollectionBookPage() {
 **File:** `components/egg/GameEgg.tsx`
 
 **Goals:**
+
 - เพิ่ม logic ตรวจจับไข่ Level 6
 - เรียก CardReveal + CardFlight components
 - บันทึกการ์ดเข้า localStorage
 
 **Features:**
+
 - [ ] Detect level 6 click
 - [ ] Show CardReveal
 - [ ] On tap → Show CardFlight
@@ -356,6 +386,7 @@ export default function CollectionBookPage() {
 - [ ] Debug function to add level 6 egg
 
 **New Code:**
+
 ```tsx
 // Add to existing GameEgg component
 
@@ -420,6 +451,7 @@ egg_game/
 ### Example 1: Common Card (🍔 Blue Set)
 
 **ด้านหน้า:**
+
 ```
 ┌────────────────────────────────────────┐
 │  ★ #009            ⭐ Common           │
@@ -437,6 +469,7 @@ egg_game/
 ```
 
 **ด้านหลัง:**
+
 ```
 ┌────────────────────────────────────────┐
 │  📖 ประวัติการ์ด                     │
@@ -460,6 +493,7 @@ egg_game/
 ### Example 2: Rare Card (🐱 Green Set)
 
 **ด้านหน้า:**
+
 ```
 ┌────────────────────────────────────────┐
 │  ★ #017            ⭐⭐⭐ Rare          │
@@ -477,6 +511,7 @@ egg_game/
 ```
 
 **ด้านหลัง:**
+
 ```
 ┌────────────────────────────────────────┐
 │  �วเรื่องเล่าขาน                   │
@@ -500,6 +535,7 @@ egg_game/
 ### Example 3: Legendary Card (☀️ Gray Set)
 
 **ด้านหน้า:**
+
 ```
 ┌────────────────────────────────────────┐
 │  ★ #033          ⭐⭐⭐⭐⭐ Legendary    │
@@ -517,6 +553,7 @@ egg_game/
 ```
 
 **ด้านหลัง:**
+
 ```
 ┌────────────────────────────────────────┐
 │  📜 ตำนานแห่งดวงอาทิตย์             │
@@ -556,12 +593,14 @@ egg_game/
 ## 🧪 Testing
 
 ### Per Step Testing
+
 - **Step 1-3:** Test card flip, rarity display, data accuracy
 - **Step 6-7:** Test grid layout, empty slots, count badges, set navigation
 - **Step 4-5:** Test animation timing, smoothness
 - **Step 8:** Test full flow (egg → reveal → flight → save)
 
 ### Integration Testing
+
 - Test localStorage save/load
 - Test getting duplicate cards
 - Test set completion → bonus card reveal

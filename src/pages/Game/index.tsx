@@ -5,6 +5,8 @@ import { GameLoop, PhysicsWorld } from '../../game/core';
 import { GAME_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
 import type { EggLevel } from '../../types/egg';
+import { CardReveal } from '../../components/card/CardReveal';
+import { addCard, getRandomCard, type Card, type EggColor as CardEggColor } from '../../lib/cardData';
 import { useDeviceOrientation } from '../../hooks/useDeviceOrientation';
 import { withBasePath } from '../../utils/routes';
 import './style.css';
@@ -13,14 +15,19 @@ import './style.css';
  * Game Page - Placeholder for Step 4
  */
 export function Game() {
+	const isDebugMode = import.meta.env.DEV;
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const mainRef = useRef<HTMLElement>(null);
 	const physicsWorldRef = useRef<PhysicsWorld | null>(null);
 	const orientationRef = useRef<{ beta: number; gamma: number; gravityX: number; gravityY: number } | null>(null);
 	const tiltEnabledRef = useRef(false);
+	const revealActiveRef = useRef(false);
 	const debugSpawnLevel6Ref = useRef<(() => void) | null>(null);
 
 	const [showTiltModal, setShowTiltModal] = useState(false);
+	const [revealedCard, setRevealedCard] = useState<Card | null>(null);
+	const [revealedEggColor, setRevealedEggColor] = useState<CardEggColor | null>(null);
+	const [revealOrigin, setRevealOrigin] = useState<{ x: number; y: number } | null>(null);
 
 	const {
 		orientation,
@@ -38,6 +45,16 @@ export function Game() {
 	useEffect(() => {
 		tiltEnabledRef.current = tiltEnabled;
 	}, [tiltEnabled]);
+
+	useEffect(() => {
+		revealActiveRef.current = revealedCard !== null && revealedEggColor !== null && revealOrigin !== null;
+	}, [revealedCard, revealedEggColor, revealOrigin]);
+
+	const handleCardRevealComplete = () => {
+		setRevealedCard(null);
+		setRevealedEggColor(null);
+		setRevealOrigin(null);
+	};
 
 	// Show modal if tilt is supported but not enabled after a delay
 	useEffect(() => {
@@ -328,12 +345,81 @@ export function Game() {
 			pointerY = event.clientY - canvasRect.top;
 		};
 
+		const isPointInsideEgg = (egg: EggEntity, x: number, y: number): boolean => {
+			const dx = x - egg.body.position.x;
+			const dy = y - egg.body.position.y;
+			const angle = -egg.body.angle;
+			const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+			const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+			const radiusX = egg.displayWidth / 2;
+			const radiusY = egg.displayHeight / 2;
+			if (radiusX <= 0 || radiusY <= 0) return false;
+
+			const normalized =
+				(localX * localX) / (radiusX * radiusX) +
+				(localY * localY) / (radiusY * radiusY);
+
+			return normalized <= 1;
+		};
+
+		const tryRevealLevel6EggAt = (x: number, y: number): boolean => {
+			if (revealActiveRef.current) return false;
+
+			const tappedEgg = [...physicsWorld.getEggs()]
+				.reverse()
+				.find((egg) => egg.level === 6 && isPointInsideEgg(egg, x, y));
+
+			if (!tappedEgg) return false;
+
+			const canvasRect = canvas.getBoundingClientRect();
+			const originX = canvasRect.left + tappedEgg.body.position.x;
+			const originY = canvasRect.top + tappedEgg.body.position.y;
+			const blastCenterX = tappedEgg.body.position.x;
+			const blastCenterY = tappedEgg.body.position.y;
+			const blastRadius = GAME_CONFIG.cardReveal.pushRadiusPx;
+			const baseForce = GAME_CONFIG.cardReveal.pushForce;
+			const upwardLiftFactor = GAME_CONFIG.cardReveal.upwardLiftFactor;
+
+			for (const egg of physicsWorld.getEggs()) {
+				if (egg.id === tappedEgg.id) continue;
+
+				const dx = egg.body.position.x - blastCenterX;
+				const dy = egg.body.position.y - blastCenterY;
+				const dist = Math.sqrt(dx * dx + dy * dy);
+				if (dist <= 0 || dist > blastRadius) continue;
+
+				const influence = 1 - dist / blastRadius;
+				const randomBoost = 0.85 + Math.random() * 0.5;
+				const magnitude = baseForce * influence * randomBoost;
+
+				Body.applyForce(egg.body, egg.body.position, {
+					x: (dx / dist) * magnitude,
+					y: (dy / dist) * magnitude - magnitude * upwardLiftFactor,
+				});
+			}
+
+			const rewardCard = getRandomCard(tappedEgg.color as CardEggColor);
+			addCard(rewardCard.color, rewardCard.emoji);
+			setRevealedCard(rewardCard);
+			setRevealedEggColor(tappedEgg.color as CardEggColor);
+			setRevealOrigin({ x: originX, y: originY });
+			physicsWorld.removeEggs([tappedEgg]);
+
+			return true;
+		};
+
 		const handlePointerDown = (event: PointerEvent) => {
 			// Prevent default touch behaviors (zoom, scroll, context menu)
 			event.preventDefault();
+			if (revealActiveRef.current) return;
 			activePointerId = event.pointerId;
 			canvas.setPointerCapture(event.pointerId);
 			updatePointerPosition(event);
+			if (tryRevealLevel6EggAt(pointerX, pointerY)) {
+				activePointerId = null;
+				return;
+			}
 			spawnEggAt(pointerX, pointerY);
 
 			stopRapidFire();
@@ -400,7 +486,9 @@ export function Game() {
 		canvas.addEventListener('pointercancel', handlePointerUpOrCancel);
 		canvas.addEventListener('contextmenu', handleContextMenu);
 		window.addEventListener('resize', handleResize);
-		window.addEventListener('keydown', handleDebugSpawnShortcut);
+		if (isDebugMode) {
+			window.addEventListener('keydown', handleDebugSpawnShortcut);
+		}
 
 		return () => {
 			debugSpawnLevel6Ref.current = null;
@@ -411,12 +499,14 @@ export function Game() {
 			canvas.removeEventListener('pointercancel', handlePointerUpOrCancel);
 			canvas.removeEventListener('contextmenu', handleContextMenu);
 			window.removeEventListener('resize', handleResize);
-			window.removeEventListener('keydown', handleDebugSpawnShortcut);
+			if (isDebugMode) {
+				window.removeEventListener('keydown', handleDebugSpawnShortcut);
+			}
 			resizeObserver.disconnect();
 			loop.stop();
 			physicsWorld.destroy();
 		};
-	}, []);
+	}, [isDebugMode]);
 
 	return (
 		<div class="game-page">
@@ -425,13 +515,24 @@ export function Game() {
 			</a>
 			<main ref={mainRef} class="game-main">
 				<canvas ref={canvasRef} class="game-canvas" />
-				<button
-					type="button"
-					class="debug-level6-hotspot"
-					aria-label="Debug spawn level 6 egg"
-					onClick={() => debugSpawnLevel6Ref.current?.()}
-				/>
+				{isDebugMode && (
+					<button
+						type="button"
+						class="debug-level6-hotspot"
+						aria-label="Debug spawn level 6 egg"
+						onClick={() => debugSpawnLevel6Ref.current?.()}
+					/>
+				)}
 			</main>
+
+			{revealedCard && revealedEggColor && revealOrigin && (
+				<CardReveal
+					card={revealedCard}
+					eggColor={revealedEggColor}
+					origin={revealOrigin}
+					onComplete={handleCardRevealComplete}
+				/>
+			)}
 
 			{/* Tilt Permission Modal */}
 			{showTiltModal && (

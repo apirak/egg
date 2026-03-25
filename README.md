@@ -14,6 +14,10 @@ This project is an experimental Suika-style merge game where eggs:
 
 The app is mobile-first and runs as a Vite web app.
 
+## Emoji SVG
+
+- https://twemoji-cheatsheet.vercel.app/
+
 ## Current Features
 
 - Pre-rendered egg sprites for performance
