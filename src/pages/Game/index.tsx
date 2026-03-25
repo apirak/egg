@@ -166,14 +166,14 @@ export function Game() {
 			if (tiltSupported) {
 				const dotX = cssWidth - 20;
 				const dotY = 20;
-				const dotRadius = 8;
+				const dotRadius = 4;
 
 				// Outer ring
-				ctx.beginPath();
-				ctx.arc(dotX, dotY, dotRadius + 2, 0, Math.PI * 2);
-				ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-				ctx.lineWidth = 2;
-				ctx.stroke();
+				// ctx.beginPath();
+				// ctx.arc(dotX, dotY, dotRadius + 2, 0, Math.PI * 2);
+				// ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+				// ctx.lineWidth = 2;
+				// ctx.stroke();
 
 				// Dot
 				ctx.beginPath();
@@ -182,11 +182,11 @@ export function Game() {
 				ctx.fill();
 
 				// Icon
-				ctx.font = '10px system-ui, sans-serif';
-				ctx.fillStyle = tiltEnabledRef.current ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText('📱', dotX, dotY);
+				// ctx.font = '10px system-ui, sans-serif';
+				// ctx.fillStyle = tiltEnabledRef.current ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
+				// ctx.textAlign = 'center';
+				// ctx.textBaseline = 'middle';
+				// ctx.fillText('📱', dotX, dotY);
 			}
 		};
 
