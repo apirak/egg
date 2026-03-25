@@ -185,6 +185,8 @@ export function Game() {
 		};
 
 		const handlePointerDown = (event: PointerEvent) => {
+			// Prevent default touch behaviors (zoom, scroll, context menu)
+			event.preventDefault();
 			activePointerId = event.pointerId;
 			canvas.setPointerCapture(event.pointerId);
 			updatePointerPosition(event);
@@ -198,13 +200,21 @@ export function Game() {
 
 		const handlePointerMove = (event: PointerEvent) => {
 			if (activePointerId !== event.pointerId) return;
+			// Prevent scrolling on touch devices
+			event.preventDefault();
 			updatePointerPosition(event);
 		};
 
 		const handlePointerUpOrCancel = (event: PointerEvent) => {
 			if (activePointerId !== event.pointerId) return;
+			event.preventDefault();
 			activePointerId = null;
 			stopRapidFire();
+		};
+
+		// Prevent context menu on long press (especially for iOS/Android)
+		const handleContextMenu = (event: Event) => {
+			event.preventDefault();
 		};
 
 		const handleResize = () => {
@@ -220,6 +230,7 @@ export function Game() {
 		canvas.addEventListener('pointermove', handlePointerMove);
 		canvas.addEventListener('pointerup', handlePointerUpOrCancel);
 		canvas.addEventListener('pointercancel', handlePointerUpOrCancel);
+		canvas.addEventListener('contextmenu', handleContextMenu);
 		window.addEventListener('resize', handleResize);
 
 		return () => {
@@ -228,6 +239,7 @@ export function Game() {
 			canvas.removeEventListener('pointermove', handlePointerMove);
 			canvas.removeEventListener('pointerup', handlePointerUpOrCancel);
 			canvas.removeEventListener('pointercancel', handlePointerUpOrCancel);
+			canvas.removeEventListener('contextmenu', handleContextMenu);
 			window.removeEventListener('resize', handleResize);
 			resizeObserver.disconnect();
 			loop.stop();
