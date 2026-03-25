@@ -1,0 +1,521 @@
+/* Card3D Component Styles */
+/* Apply game card fonts */
+.card-3d-container {
+	font-family: 'Poppins', sans-serif;
+}
+
+.itim-regular {
+	font-family: 'Itim', cursive;
+	font-weight: 400;
+	font-style: normal;
+}
+
+/* 3D Card Container */
+.card-3d-container {
+	position: relative;
+	perspective: 1000px;
+	cursor: pointer;
+}
+
+/* Card Sizes - Adjusted for better proportions */
+.card-sm {
+	width: 9rem;
+	height: 12.5rem;
+}
+
+.card-md {
+	width: 13rem;
+	height: 18rem;
+}
+
+.card-lg {
+	width: 18rem;
+	height: 24rem;
+}
+
+/* Card Inner Container */
+.card-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+	transform-style: preserve-3d;
+}
+
+.card-inner.flipped {
+	transform: rotateY(180deg);
+}
+
+.card-inner.hovered:not(.flipped) {
+	transform: scale(1.05);
+}
+
+/* Card Front */
+.card-front {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	background: #ffffff;
+	border-radius: 0.75rem;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+	z-index: 2;
+}
+
+/* Rarity Border Colors - Use color-tinted borders */
+.card-front.common {
+	border-color: rgba(156, 163, 175, 0.5);
+}
+
+.card-front.uncommon {
+	border-color: rgba(34, 197, 94, 0.5);
+}
+
+.card-front.rare {
+	border-color: rgba(59, 130, 246, 0.5);
+}
+
+.card-front.epic {
+	border-color: rgba(168, 85, 247, 0.5);
+}
+
+.card-front.legendary {
+	border-color: rgba(234, 179, 8, 0.6);
+	box-shadow: 0 2px 12px rgba(234, 179, 8, 0.2), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Glow Effects for rarity */
+.card-front.uncommon {
+	box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card-front.rare {
+	box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card-front.epic {
+	box-shadow: 0 2px 12px rgba(168, 85, 247, 0.25), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Holographic Overlay */
+.card-holographic {
+	position: absolute;
+	inset: 0;
+	opacity: 0.15;
+	background: linear-gradient(to bottom right, transparent, rgba(0, 0, 0, 0.05), transparent);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.card-holographic.shimmer {
+	animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%) rotate(45deg);
+	}
+	100% {
+		transform: translateX(100%) rotate(45deg);
+	}
+}
+
+/* Card Top Bar */
+.card-top-bar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.4rem 0.6rem;
+	background: rgba(0, 0, 0, 0.05);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.card-rarity-badge {
+	font-size: 0.6rem;
+	font-weight: bold;
+	padding: 0.15rem 0.4rem;
+	border-radius: 0.25rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.card-rarity-badge.common {
+	background: #e5e7eb;
+	color: #6b7280;
+}
+
+.card-rarity-badge.uncommon {
+	background: #dcfce7;
+	color: #16a34a;
+}
+
+.card-rarity-badge.rare {
+	background: #dbeafe;
+	color: #2563eb;
+}
+
+.card-rarity-badge.epic {
+	background: #f3e8ff;
+	color: #9333ea;
+}
+
+.card-rarity-badge.legendary {
+	background: #fef3c7;
+	color: #d97706;
+}
+
+.card-number {
+	font-size: 0.7rem;
+	font-weight: 600;
+	color: #374151;
+}
+
+/* Card Image Area */
+.card-image-area {
+	position: absolute;
+	top: 2.6rem;
+	left: 0.6rem;
+	right: 0.6rem;
+	height: 42%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.card-image-circle {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.06) 100%);
+	border-radius: 0.5rem;
+	position: relative;
+	overflow: hidden;
+}
+
+.card-image-circle::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+}
+
+.card-emoji-sm {
+	width: 3.5rem;
+	height: 3.5rem;
+}
+
+.card-emoji-md {
+	width: 5.5rem;
+	height: 5.5rem;
+}
+
+.card-emoji-lg {
+	width: 7rem;
+	height: 7rem;
+}
+
+.card-emoji {
+	display: block;
+	object-fit: contain;
+	position: relative;
+	max-width: 100%;
+	max-height: 100%;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Card Name Area */
+.card-name-area {
+	position: absolute;
+	top: 62%;
+	left: 0.5rem;
+	right: 0.5rem;
+	text-align: center;
+}
+
+.card-name-th {
+	margin: 0;
+	font-weight: 400;
+	font-size: 1.85rem;
+	color: #1f2937;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: 'Itim', cursive;
+}
+
+.card-name-en {
+	margin: 0;
+	font-size: 0.6rem;
+	color: #6b7280;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Card Stats Area */
+.card-stats-area {
+	position: absolute;
+	bottom: 1.8rem;
+	left: 0.5rem;
+	right: 0.5rem;
+}
+
+.stat-row {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.stat-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.1rem;
+}
+
+.stat-label {
+	font-size: 0.5rem;
+	font-weight: 500;
+	letter-spacing: 0.05em;
+	color: #6b7280;
+}
+
+.stat-value {
+	font-size: 0.95rem;
+	font-weight: 800;
+	line-height: 1;
+}
+
+.stat-value.mind {
+	color: #3b82f6;
+}
+
+.stat-value.body {
+	color: #ef4444;
+}
+
+.stat-value.spirit {
+	color: #22c55e;
+}
+
+/* Card Type Border - colored bottom border */
+.card-type-border {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+}
+
+.card-type-border.red {
+	background: linear-gradient(to right, #ef4444, #dc2626);
+}
+
+.card-type-border.blue {
+	background: linear-gradient(to right, #3b82f6, #2563eb);
+}
+
+.card-type-border.green {
+	background: linear-gradient(to right, #22c55e, #16a34a);
+}
+
+.card-type-border.yellow {
+	background: linear-gradient(to right, #eab308, #ca8a04);
+}
+
+.card-type-border.gray {
+	background: linear-gradient(to right, #6b7280, #4b5563);
+}
+
+/* Count Badge */
+.card-count-badge {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	background-color: #ef4444;
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: bold;
+	padding: 0.25rem 0.5rem;
+	border-radius: 9999px;
+}
+
+/* Card Back (Lore) */
+.card-back {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	background: linear-gradient(to bottom right, #1a1a2e, #16213e);
+	border-radius: 0.75rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	overflow: hidden;
+	transform: rotateY(180deg);
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Color-tinted border for card back */
+.card-back.red {
+	border-color: rgba(239, 68, 68, 0.4);
+}
+
+.card-back.blue {
+	border-color: rgba(59, 130, 246, 0.4);
+}
+
+.card-back.green {
+	border-color: rgba(34, 197, 94, 0.4);
+}
+
+.card-back.yellow {
+	border-color: rgba(234, 179, 8, 0.4);
+}
+
+.card-back.gray {
+	border-color: rgba(107, 114, 128, 0.4);
+}
+
+/* Card Back ID */
+.back-card-id {
+	flex-shrink: 0;
+	padding: 0.6rem 0 0.4rem 0;
+	text-align: center;
+}
+
+.back-card-id span {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: rgba(255, 255, 255, 0.5);
+	letter-spacing: 0.1em;
+}
+
+/* Lore Content */
+.card-lore-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	overflow-y: auto;
+	padding: 0 0.7rem;
+	margin: 0.4rem 0;
+}
+
+.card-lore-header {
+	text-align: center;
+	margin-bottom: 0.6rem;
+}
+
+.card-lore-header h4 {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.95);
+	letter-spacing: 0.05em;
+	font-family: 'Itim', cursive;
+}
+
+.card-lore-text {
+	font-size: 0.9rem;
+	color: rgba(255, 255, 255, 0.85);
+	line-height: 0.4;
+	margin-bottom: 0.4rem;
+	text-align: center;
+	font-style: normal;
+	font-family: 'Itim', cursive;
+}
+
+/* Card Ability */
+.card-ability {
+	flex-shrink: 0;
+	margin: 0 0.7rem 0.5rem 0.7rem;
+	padding: 0.5rem;
+	background-color: rgba(0, 0, 0, 0.2);
+	border-radius: 0.375rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ability-label {
+	font-size: 0.65rem;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.6);
+	letter-spacing: 0.05em;
+	margin: 0 0 0.3rem 0;
+	font-family: 'Itim', cursive;
+}
+
+.ability-text {
+	font-size: 0.75rem;
+	color: rgba(255, 255, 255, 0.9);
+	margin: 0;
+	line-height: 1.4;
+	font-family: 'Itim', cursive;
+}
+
+/* Card Power Footer - at bottom edge */
+.card-power-footer {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem;
+	background-color: rgba(0, 0, 0, 0.3);
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.power-label {
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: rgba(255, 255, 255, 0.6);
+	letter-spacing: 0.05em;
+}
+
+.power-value {
+	font-size: 0.95rem;
+	font-weight: 800;
+	color: #fbbf24;
+}
+
+/* Rarity Glow */
+.card-rarity-glow {
+	position: absolute;
+	inset: 0;
+	border-radius: 0.75rem;
+	pointer-events: none;
+	filter: blur(0.75rem);
+	z-index: -1;
+}
+
+.card-rarity-glow.epic {
+	background-color: rgba(168, 85, 247, 0.2);
+}
+
+.card-rarity-glow.legendary {
+	background-color: rgba(234, 179, 8, 0.2);
+}
+
+.card-rarity-glow.pulse {
+	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}

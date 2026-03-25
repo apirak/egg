@@ -6,7 +6,7 @@ export interface CardProps {
 	variant?: 'default' | 'elevated' | 'outlined';
 	padding?: 'none' | 'sm' | 'md' | 'lg';
 	onClick?: () => void;
-	href?: (el: HTMLDivElement | null) => void;
+	ref?: (el: HTMLDivElement | null) => void;
 	class?: string;
 }
 

@@ -6,6 +6,7 @@ export function Navigation() {
 		{ id: 'collection', title: 'Egg Collection', description: 'View all egg types', route: '/collection', icon: '🥚' },
 		{ id: 'egg-shape', title: 'Egg Geometry', description: 'Learn about egg shapes', route: '/egg-shape', icon: '📐' },
 		{ id: 'accelerometer', title: 'Accelerometer', description: 'Test tilt controls', route: '/accelerometer', icon: '📱' },
+		{ id: 'card-design', title: 'Card Design', description: 'Preview 40 collectible cards', route: '/card-design', icon: '🎴' },
 	];
 
 	return (

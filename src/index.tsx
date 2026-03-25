@@ -6,6 +6,7 @@ import { MathEggDemo } from './pages/EggShape/MathDemo';
 import { EggCollection } from './pages/EggCollection/index';
 import { Game } from './pages/Game/index';
 import { Accelerometer } from './pages/Accelerometer/index';
+import { CardDesign } from './pages/CardDesign/index';
 import './style.css';
 
 export function App() {
@@ -20,6 +21,7 @@ export function App() {
 					<Route path="/egg-shape" component={MathEggDemo} />
 					<Route path="/collection" component={EggCollection} />
 					<Route path="/accelerometer" component={Accelerometer} />
+					<Route path="/card-design" component={CardDesign} />
 					<Route default component={NotFound} />
 				</Router>
 			</main>

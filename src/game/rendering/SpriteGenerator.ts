@@ -60,7 +60,7 @@ const LEVEL6_EMOJI_SETS: Record<EggColor, string[]> = {
 };
 
 const TWEMOJI_CDN_BASE =
-  "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/";
+  "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/";
 
 /**
  * SpriteGenerator class
@@ -663,7 +663,7 @@ export class SpriteGenerator {
 
     const emoji = this.getRandomLevel6Emoji(color);
     const twemojiCode = this.toTwemojiCode(emoji);
-    const url = `${TWEMOJI_CDN_BASE}${twemojiCode}.png`;
+    const url = `${TWEMOJI_CDN_BASE}${twemojiCode}.svg`;
 
     this.getTwemojiImage(url)
       .then((image) => {
@@ -750,10 +750,20 @@ export class SpriteGenerator {
   }
 
   private toTwemojiCode(emoji: string): string {
-    return Array.from(emoji)
+    const codePoints = Array.from(emoji)
       .map((char) => char.codePointAt(0)?.toString(16))
-      .filter((code): code is string => Boolean(code) && code !== "fe0f")
-      .join("-");
+      .filter((code): code is string => Boolean(code));
+
+    // Check if this is a ZWJ sequence (contains 200d)
+    const hasZWJ = codePoints.includes('200d');
+
+    if (hasZWJ) {
+      // ZWJ sequence - keep fe0f at the end
+      return codePoints.join('-');
+    } else {
+      // Simple emoji - remove fe0f
+      return codePoints.filter((code): code is string => code !== 'fe0f').join('-');
+    }
   }
 
   private getTwemojiImage(url: string): Promise<HTMLImageElement> {

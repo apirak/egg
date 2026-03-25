@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { Layout, Page } from '../../design-system';
 import { BackButton } from '../../components/BackButton';
 import { generateEggPoints, eggPointsToPath, DEFAULT_EGG_MATH, type EggParametricConfig, getEggDimensions } from '../../game/geometry/EggGeometryMath';
-import { getSpriteGenerator, EGG_COLORS } from '../../game/rendering/SpriteGenerator';
 import './style.css';
 
 /**
