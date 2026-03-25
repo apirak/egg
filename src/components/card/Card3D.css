@@ -31,6 +31,7 @@
 .card-lg {
 	width: 18rem;
 	height: 24rem;
+	max-width: 100%;
 }
 
 /* Card Inner Container */
@@ -47,7 +48,7 @@
 }
 
 .card-inner.hovered:not(.flipped) {
-	transform: scale(1.05);
+	transform: none;
 }
 
 /* Card Front */

@@ -287,13 +287,13 @@ interface CardFlightProps {
 
 **Features:**
 
-- [ ] Grid layout 4x2
-- [ ] Empty slot design (shadow/emboss emoji)
-- [ ] Filled slot with Card3D component
-- [ ] Count badge (x1, x2, ...)
-- [ ] Progress display (Unique/Total)
-- [ ] Card hover effect (tilt, shine)
-- [ ] Bonus card slot (locked when incomplete)
+- [x] Grid layout 4x2
+- [x] Empty slot design (shadow/emboss emoji)
+- [x] Filled slot with Card3D component
+- [x] Count badge (x1, x2, ...)
+- [x] Progress display (Unique/Total)
+- [x] Card hover effect (tilt, shine)
+- [x] Bonus card slot (locked when incomplete)
 
 **Props:**
 

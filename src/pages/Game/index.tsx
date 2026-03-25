@@ -520,6 +520,9 @@ export function Game() {
 			<a href={withBasePath('/menu')} class="menu-button">
 				<span>☰</span>
 			</a>
+			<a href={withBasePath('/collection-book')} class="collection-book-button">
+				<span>📘</span>
+			</a>
 			<main ref={mainRef} class="game-main">
 				<canvas ref={canvasRef} class="game-canvas" />
 				{isDebugMode && (

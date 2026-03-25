@@ -3,6 +3,7 @@ import { withBasePath } from '../utils/routes';
 
 export function Navigation() {
 	const menuItems = [
+		{ id: 'collection-book', title: 'Card Collection Book', description: 'Open your collected cards by egg set', route: '/collection-book', icon: '📘' },
 		{ id: 'collection', title: 'Egg Collection', description: 'View all egg types', route: '/collection', icon: '🥚' },
 		{ id: 'egg-shape', title: 'Egg Geometry', description: 'Learn about egg shapes', route: '/egg-shape', icon: '📐' },
 		{ id: 'accelerometer', title: 'Accelerometer', description: 'Test tilt controls', route: '/accelerometer', icon: '📱' },
