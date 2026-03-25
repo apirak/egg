@@ -155,15 +155,6 @@ export function Game() {
 				ctx.restore();
 			}
 
-			ctx.fillStyle = 'rgba(0, 0, 0, 0.58)';
-			ctx.font = '14px system-ui, sans-serif';
-			const ascendedText = EGG_COLORS.map((color) => `${color[0].toUpperCase()}:${ascendedCount[color]}`).join('  ');
-			ctx.fillText(
-				`Ascended  ${ascendedText}`,
-				16,
-				24,
-			);
-
 			// Draw tilt indicator dot
 			if (tiltSupported) {
 				const dotX = cssWidth - 20;
