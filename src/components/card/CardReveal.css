@@ -126,6 +126,21 @@
   transition: transform 320ms ease-in, opacity 260ms ease-in;
 }
 
+.card-stage.flying {
+  position: fixed;
+  z-index: 1001;
+  transition: transform 60ms linear;
+  transform: translate(
+    calc(var(--fly-x, 0) * var(--fly-progress, 0)),
+    calc(var(--fly-y, 0) * var(--fly-progress, 0))
+  ) scale(calc(1 - var(--fly-progress, 0) * 0.85));
+  opacity: calc(1 - var(--fly-progress, 0) * 0.3);
+}
+
+.card-stage.flying .card-3d-container {
+  pointer-events: none;
+}
+
 .card-reveal-container.closing .egg-pop,
 .card-reveal-container.card .egg-pop {
   display: none;

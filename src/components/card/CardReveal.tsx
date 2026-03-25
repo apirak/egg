@@ -11,6 +11,13 @@ interface CardRevealProps {
   origin: { x: number; y: number };
 }
 
+interface FlyAnimation {
+  isFlying: boolean;
+  targetX: number;
+  targetY: number;
+  progress: number;
+}
+
 interface BurstParticle {
   key: string;
   emoji: string;
@@ -35,10 +42,17 @@ interface BurstParticleFrame {
 export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealProps) {
   const cfg = GAME_CONFIG.cardReveal;
   const closeTimerRef = useRef<number | null>(null);
+  const cardStageRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<'exploding' | 'card'>('exploding');
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [particleFrames, setParticleFrames] = useState<BurstParticleFrame[]>([]);
+  const [flyAnimation, setFlyAnimation] = useState<FlyAnimation>({
+    isFlying: false,
+    targetX: 0,
+    targetY: 0,
+    progress: 0,
+  });
 
   const burstParticles = useMemo<BurstParticle[]>(() => {
     const accents = ['⭐', '✨'];
@@ -69,9 +83,61 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
     if (isClosing || stage !== 'card') return;
     setIsClosing(true);
     setIsCardFlipped(false);
-    closeTimerRef.current = window.setTimeout(() => {
-      onComplete();
-    }, cfg.dismissFlipOutMs);
+
+    // Get collection book button position
+    const bookButton = document.querySelector('.collection-book-button') as HTMLElement;
+    if (!bookButton || !cardStageRef.current) {
+      // Fallback if button not found
+      closeTimerRef.current = window.setTimeout(() => {
+        onComplete();
+      }, cfg.dismissFlipOutMs);
+      return;
+    }
+
+    const bookRect = bookButton.getBoundingClientRect();
+    const cardRect = cardStageRef.current.getBoundingClientRect();
+
+    // Calculate the delta from current position to target
+    const targetCenterX = bookRect.left + bookRect.width / 2;
+    const targetCenterY = bookRect.top + bookRect.height / 2;
+    const currentCenterX = cardRect.left + cardRect.width / 2;
+    const currentCenterY = cardRect.top + cardRect.height / 2;
+
+    const deltaX = targetCenterX - currentCenterX;
+    const deltaY = targetCenterY - currentCenterY;
+
+    setFlyAnimation({
+      isFlying: true,
+      targetX: deltaX,
+      targetY: deltaY,
+      progress: 0,
+    });
+
+    // Animate card flying to book
+    const flyDuration = 600;
+    const startTime = performance.now();
+
+    const animateFly = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / flyDuration);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+
+      setFlyAnimation((prev) => ({
+        ...prev,
+        progress: eased,
+      }));
+
+      if (progress < 1) {
+        requestAnimationFrame(animateFly);
+      } else {
+        // Animation complete, scale down and finish
+        closeTimerRef.current = window.setTimeout(() => {
+          onComplete();
+        }, 150);
+      }
+    };
+
+    requestAnimationFrame(animateFly);
   }, [cfg.dismissFlipOutMs, isClosing, onComplete, stage]);
 
   useEffect(() => {
@@ -198,8 +264,14 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
       </div>
 
       <div
-        class={`card-stage ${stage} ${isClosing ? 'closing' : ''}`}
-        style={{ '--entry-duration': `${cfg.cardEntryDurationMs}ms` }}
+        ref={cardStageRef}
+        class={`card-stage ${stage} ${isClosing ? 'closing' : ''} ${flyAnimation.isFlying ? 'flying' : ''}`}
+        style={{
+          '--entry-duration': `${cfg.cardEntryDurationMs}ms`,
+          '--fly-x': flyAnimation.isFlying ? `${flyAnimation.targetX}px` : '0',
+          '--fly-y': flyAnimation.isFlying ? `${flyAnimation.targetY}px` : '0',
+          '--fly-progress': flyAnimation.progress,
+        }}
         onClick={(event) => {
           event.stopPropagation();
         }}
