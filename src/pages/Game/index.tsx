@@ -17,6 +17,7 @@ export function Game() {
 	const mainRef = useRef<HTMLElement>(null);
 	const physicsWorldRef = useRef<PhysicsWorld | null>(null);
 	const orientationRef = useRef<{ beta: number; gamma: number; gravityX: number; gravityY: number } | null>(null);
+	const tiltEnabledRef = useRef(false);
 
 	const {
 		orientation,
@@ -31,6 +32,11 @@ export function Game() {
 	useEffect(() => {
 		orientationRef.current = orientation;
 	}, [orientation]);
+
+	// Keep tiltEnabled ref updated for draw function
+	useEffect(() => {
+		tiltEnabledRef.current = tiltEnabled;
+	}, [tiltEnabled]);
 
 	// Update gravity when orientation changes
 	useEffect(() => {
@@ -156,7 +162,7 @@ export function Game() {
 
 			// Draw tilt indicator when tilt is supported
 			if (tiltSupported) {
-				drawTiltIndicator(ctx, cssWidth, cssHeight, tiltEnabled, orientationRef.current);
+				drawTiltIndicator(ctx, cssWidth, cssHeight, tiltEnabledRef.current, orientationRef.current);
 			}
 		};
 

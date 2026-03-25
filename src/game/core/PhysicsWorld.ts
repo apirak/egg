@@ -1,5 +1,4 @@
-import { Bodies, Composite, Engine, World } from "matter-js";
-import type { Body } from "matter-js";
+import { Bodies, Composite, Engine, World, Sleeping, Body } from "matter-js";
 import type { EggEntity } from "../entities/EggFactory";
 import { GAME_CONFIG } from "../config/GameConfig";
 
@@ -33,6 +32,13 @@ export class PhysicsWorld {
     this.currentGravity = { x, y };
     this.engine.world.gravity.x = x;
     this.engine.world.gravity.y = y;
+
+    // Wake up all sleeping eggs when gravity changes
+    for (const egg of this.eggs) {
+      if (egg.body.isSleeping) {
+        Sleeping.set(egg.body, false);
+      }
+    }
   }
 
   getGravity(): { x: number; y: number } {
@@ -100,8 +106,15 @@ export class PhysicsWorld {
       t,
       { isStatic: true, label: "wall" },
     );
+    const top = Bodies.rectangle(
+      this.width / 2,
+      -halfT,
+      this.width + t * 2,
+      t,
+      { isStatic: true, label: "wall" },
+    );
 
-    this.walls = [left, right, bottom];
+    this.walls = [left, right, bottom, top];
     World.add(this.engine.world, this.walls);
   }
 

@@ -33,10 +33,10 @@ export const EGG_COLOR_INFO: Record<EggColor, { name: string; emoji: string }> =
 export const EGG_SIZE_MULTIPLIERS: Record<EggLevel, number> = {
   1: 1.0,
   2: 1.2,
-  3: 1.44,
-  4: 1.728,
-  5: 2.074,
-  6: 2.4888, // 1.2x of level 5 (2.074 * 1.2)
+  3: 1.4,
+  4: 1.8,
+  5: 2.2,
+  6: 2.6,
 };
 
 /**
