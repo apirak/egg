@@ -101,8 +101,27 @@ export class DeviceOrientationService {
 		const clampedBeta = this.clamp(adjustedBeta, -config.maxTiltAngle, config.maxTiltAngle);
 		const clampedGamma = this.clamp(adjustedGamma, -config.maxTiltAngle, config.maxTiltAngle);
 
-		const gravityX = clampedGamma * config.gravityScale;
-		const gravityY = clampedBeta * config.gravityScale;
+		let gravityX = clampedGamma * config.gravityScale;
+		let gravityY = clampedBeta * config.gravityScale;
+
+		// Adjust gravity based on screen orientation type
+		// DeviceOrientationEvent uses device frame (portrait), but screen may be rotated
+		// Note: orientation.angle may be unreliable on some devices, use type instead
+		const orientation = window.screen.orientation;
+		const type = orientation?.type ?? 'portrait-primary';
+
+		if (type === 'landscape-primary') {
+			// Landscape (home button left on iOS) - rotate 90° clockwise
+			[gravityX, gravityY] = [gravityY, -gravityX];
+		} else if (type === 'landscape-secondary') {
+			// Landscape reverse (home button right on iOS) - rotate 90° counter-clockwise
+			[gravityX, gravityY] = [-gravityY, gravityX];
+		} else if (type === 'portrait-secondary') {
+			// Portrait upside down - invert both axes
+			gravityX = -gravityX;
+			gravityY = -gravityY;
+		}
+		// portrait-primary - no adjustment needed
 
 		this.callbacks.onOrientationChange?.({
 			beta: this.currentBeta,

@@ -248,12 +248,29 @@ export function Accelerometer() {
 				if (orient && tiltEnabledRef.current) {
 					const infoX = cssWidth - 12;
 					const infoY = cssHeight - 12;
-					ctx.font = 'bold 12px system-ui, monospace';
+
+					// Get screen orientation
+					const screenAngle = window.screen.orientation?.angle ?? 0;
+					const screenType = window.screen.orientation?.type ?? 'unknown';
+
+					ctx.font = 'bold 11px system-ui, monospace';
 					ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
 					ctx.textAlign = 'right';
 					ctx.textBaseline = 'bottom';
-					ctx.fillText(`Gx: ${orient.gravityX.toFixed(2)}`, infoX, infoY);
-					ctx.fillText(`Gy: ${orient.gravityY.toFixed(2)}`, infoX, infoY - 16);
+
+					// Debug values
+					let line = 0;
+					const lineHeight = 13;
+					const drawLine = (text: string) => {
+						ctx.fillText(text, infoX, infoY - line * lineHeight);
+						line++;
+					};
+
+					drawLine(`Angle: ${screenAngle}° (${screenType})`);
+					drawLine(`Beta: ${orient.beta.toFixed(1)}°`);
+					drawLine(`Gamma: ${orient.gamma.toFixed(1)}°`);
+					drawLine(`Gx: ${orient.gravityX.toFixed(2)}`);
+					drawLine(`Gy: ${orient.gravityY.toFixed(2)}`);
 				}
 			}
 
