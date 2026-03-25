@@ -53,6 +53,20 @@ export function Card3D({ card, isFlipped = false, onFlip, showCount, size = 'md'
   const sizeClass = size === 'sm' ? 'card-sm' : size === 'lg' ? 'card-lg' : 'card-md';
   const emojiClass = size === 'sm' ? 'card-emoji-sm' : size === 'lg' ? 'card-emoji-lg' : 'card-emoji-md';
 
+  // Color-to-shadow mapping
+  const shadowColorMap = {
+    red: 'rgba(239, 68, 68, 0.25)',      // Light red
+    blue: 'rgba(59, 130, 246, 0.25)',     // Light blue
+    green: 'rgba(34, 197, 94, 0.25)',     // Light green
+    yellow: 'rgba(234, 179, 8, 0.25)',    // Light yellow
+    gray: 'rgba(107, 114, 128, 0.25)',    // Light gray
+  };
+
+  const shadowColor = shadowColorMap[card.color];
+  const cardStyle = {
+    '--shadow-color': shadowColor,
+  } as Record<string, string>;
+
   return (
     <div
       class={`card-3d-container ${sizeClass}`}
@@ -64,7 +78,7 @@ export function Card3D({ card, isFlipped = false, onFlip, showCount, size = 'md'
         class={`card-inner ${flipped ? 'flipped' : ''} ${isHovered && !flipped ? 'hovered' : ''}`}
       >
         {/* Front of Card */}
-        <div class={`card-front ${card.rarity}`}>
+        <div class={`card-front ${card.rarity}`} style={cardStyle}>
           {/* Holographic gradient overlay */}
           <div class={`card-holographic ${isHovered ? 'shimmer' : ''}`} />
 
@@ -112,9 +126,6 @@ export function Card3D({ card, isFlipped = false, onFlip, showCount, size = 'md'
             </div>
           </div>
 
-          {/* Bottom Type Badge - colored border only */}
-          <div class={`card-type-border ${card.color}`}></div>
-
           {/* Count Badge */}
           {showCount !== undefined && showCount > 1 && (
             <div class="card-count-badge">
@@ -124,7 +135,7 @@ export function Card3D({ card, isFlipped = false, onFlip, showCount, size = 'md'
         </div>
 
         {/* Back of Card (Lore) */}
-        <div class={`card-back ${card.color}`}>
+        <div class="card-back">
           {/* Card ID at top */}
           <div class="back-card-id">
             <span>#{card.id}</span>

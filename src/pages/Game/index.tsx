@@ -6,7 +6,7 @@ import { GAME_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
 import type { EggLevel } from '../../types/egg';
 import { CardReveal } from '../../components/card/CardReveal';
-import { addCard, getRandomCard, type Card, type EggColor as CardEggColor } from '../../lib/cardData';
+import { addCard, getCardByEmoji, type Card, type EggColor as CardEggColor } from '../../lib/cardData';
 import { useDeviceOrientation } from '../../hooks/useDeviceOrientation';
 import { withBasePath } from '../../utils/routes';
 import './style.css';
@@ -399,7 +399,14 @@ export function Game() {
 				});
 			}
 
-			const rewardCard = getRandomCard(tappedEgg.color as CardEggColor);
+			if (!tappedEgg.emoji) return false;
+
+			const rewardCard = getCardByEmoji(
+				tappedEgg.color as CardEggColor,
+				tappedEgg.emoji,
+			);
+			if (!rewardCard) return false;
+
 			addCard(rewardCard.color, rewardCard.emoji);
 			setRevealedCard(rewardCard);
 			setRevealedEggColor(tappedEgg.color as CardEggColor);

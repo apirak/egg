@@ -13,11 +13,13 @@ import {
   DEFAULT_EGG_MATH,
   generateEggPoints,
 } from "../geometry/EggGeometryMath";
+import { getRandomCardEmoji } from "../../lib/cardData";
 
 export interface EggEntity {
   id: string;
   color: EggColor;
   level: EggLevel;
+  emoji?: string;
   body: Body;
   sprite: EggSprite;
   displayWidth: number;
@@ -32,9 +34,11 @@ export class EggFactory {
     y: number,
     level: EggLevel = 1,
     color?: EggColor,
+    emoji?: string,
   ): EggEntity {
     const eggColor = color ?? this.randomColor();
-    const sprite = getSpriteGenerator().getSpriteForColor(eggColor, level);
+    const eggEmoji = level === 6 ? (emoji ?? getRandomCardEmoji(eggColor)) : undefined;
+    const sprite = getSpriteGenerator().getSpriteForColor(eggColor, level, "main", eggEmoji);
     const displayWidth = getGameplayEggSize(sprite.width);
     const displayHeight = getGameplayEggSize(sprite.height);
 
@@ -45,6 +49,7 @@ export class EggFactory {
       id: `egg-${eggIdCounter++}`,
       color: eggColor,
       level,
+      emoji: eggEmoji,
       body,
       sprite,
       displayWidth,

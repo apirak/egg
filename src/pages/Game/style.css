@@ -1,31 +1,55 @@
 .game-page {
+	/* Rainbow pastel tablecloth pattern */
+	--theme-is-dark: 1; /* Change to 1 for dark theme, 0 for light theme */
+	--global-opacity: 0.03;
+	--p-pink: rgba(255, 170, 190, var(--global-opacity));
+	--p-blue: rgba(150, 210, 255, var(--global-opacity));
+	--p-yellow: rgba(255, 235, 160, var(--global-opacity));
+	--p-green: rgba(160, 235, 190, var(--global-opacity));
+	--p-purple: rgba(210, 190, 255, var(--global-opacity));
+	--cell-size: 30px;
+	--total-size: calc(var(--cell-size) * 10);
+
 	height: 100vh;
 	height: 100dvh; /* Dynamic viewport height for mobile browsers */
 	width: 100vw;
-	background:
-		conic-gradient(
-			from 90deg,
-			#fce7f3 0% 25%,
-			#e0f2fe 25% 50%,
-			#fef9c3 50% 75%,
-			#dcfce7 75% 100%
-		)
-		0 0 / 40px 40px;
+	background-color: rgb(
+		calc(255 - 229 * var(--theme-is-dark)),
+		calc(255 - 229 * var(--theme-is-dark)),
+		calc(255 - 229 * var(--theme-is-dark))
+	);
+	background-image:
+		repeating-linear-gradient(
+			45deg,
+			rgba(0, 0, 0, 0.02) 0px,
+			rgba(0, 0, 0, 0.02) 1px,
+			transparent 1px,
+			transparent 4px
+		),
+		linear-gradient(
+			90deg,
+			var(--p-pink) 0% 10%, transparent 10% 20%,
+			var(--p-blue) 20% 30%, transparent 30% 40%,
+			var(--p-yellow) 40% 50%, transparent 50% 60%,
+			var(--p-green) 60% 70%, transparent 70% 80%,
+			var(--p-purple) 80% 90%, transparent 90% 100%
+		),
+		linear-gradient(
+			180deg,
+			var(--p-pink) 0% 10%, transparent 10% 20%,
+			var(--p-blue) 20% 30%, transparent 30% 40%,
+			var(--p-yellow) 40% 50%, transparent 50% 60%,
+			var(--p-green) 60% 70%, transparent 70% 80%,
+			var(--p-purple) 80% 90%, transparent 90% 100%
+		);
+	background-size:
+		4px 4px,
+		var(--total-size) 100%,
+		100% var(--total-size);
 	/* Prevent iOS bounce/scroll effects */
 	overscroll-behavior: none;
 	overflow: hidden;
 	position: relative;
-}
-
-.game-page::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	pointer-events: none;
-	background: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
-	background-size: 3px 3px;
-	opacity: 0.3;
-	z-index: 0;
 }
 
 .menu-button {
