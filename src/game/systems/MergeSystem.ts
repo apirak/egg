@@ -19,6 +19,8 @@ export class MergeSystem {
         const b = eggs[j];
 
         if (a.color !== b.color || a.level !== b.level) continue;
+      // Level 6 is the final level - don't merge
+      if (a.level === 6) continue;
         if (this.isCoolingDown(a.id, now) || this.isCoolingDown(b.id, now))
           continue;
         if (!Collision.collides(a.body, b.body)) continue;

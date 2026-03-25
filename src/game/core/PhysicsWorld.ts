@@ -56,6 +56,13 @@ export class PhysicsWorld {
   }
 
   addEgg(egg: EggEntity): void {
+    // Safety check: clamp egg position to stay within bounds
+    const halfW = egg.displayWidth / 2;
+    const halfH = egg.displayHeight / 2;
+    const x = Math.max(halfW, Math.min(this.width - halfW, egg.body.position.x));
+    const y = Math.max(halfH, Math.min(this.height - halfH, egg.body.position.y));
+    Body.setPosition(egg.body, { x, y });
+
     this.eggs.push(egg);
     World.add(this.engine.world, egg.body);
   }

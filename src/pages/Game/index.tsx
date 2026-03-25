@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Body, Collision } from 'matter-js';
-import { EggFactory } from '../../game/entities';
+import { EggFactory, type EggEntity } from '../../game/entities';
 import { GameLoop, PhysicsWorld } from '../../game/core';
 import { GAME_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
-import type { EggColor, EggLevel } from '../../types/egg';
-import { EGG_COLORS } from '../../game/config/EggConfig';
+import type { EggLevel } from '../../types/egg';
 import { useDeviceOrientation } from '../../hooks/useDeviceOrientation';
 import './style.css';
 
@@ -111,10 +110,6 @@ export function Game() {
 		physicsWorldRef.current = physicsWorld;
 		const eggFactory = new EggFactory();
 		const mergeSystem = new MergeSystem();
-		const ascendedCount = EGG_COLORS.reduce((acc, color) => {
-			acc[color] = 0;
-			return acc;
-		}, {} as Record<EggColor, number>);
 
 		const setupCanvas = () => {
 			const rect = main.getBoundingClientRect();
@@ -190,18 +185,33 @@ export function Game() {
 			const [a, b] = pair;
 			mergeSystem.markMerged([a.id, b.id]);
 
-			const mergeX = (a.body.position.x + b.body.position.x) / 2;
-			const mergeY = (a.body.position.y + b.body.position.y) / 2;
+			let mergeX = (a.body.position.x + b.body.position.x) / 2;
+			let mergeY = (a.body.position.y + b.body.position.y) / 2;
 
 			physicsWorld.removeEggs([a, b]);
 
-			if (a.level === 6) {
-				ascendedCount[a.color] += 1;
-				return true;
-			}
-
 			const nextLevel = (a.level + 1) as EggLevel;
 			const mergedEgg = eggFactory.createEgg(mergeX, mergeY, nextLevel, a.color);
+
+			// Clear space for merged egg: gently push nearby eggs away from merge point
+			const clearRadius = mergedEgg.displayWidth * 0.8;
+			const pushForce = 0.008;
+
+			for (const egg of physicsWorld.getEggs()) {
+				const dx = egg.body.position.x - mergeX;
+				const dy = egg.body.position.y - mergeY;
+				const dist = Math.sqrt(dx * dx + dy * dy);
+
+				if (dist < clearRadius && dist > 0) {
+					// Push away gently
+					const forceX = (dx / dist) * pushForce;
+					const forceY = (dy / dist) * pushForce;
+					Body.applyForce(egg.body, egg.body.position, { x: forceX, y: forceY });
+				}
+			}
+
+			// Place merged egg at merge position
+			Body.setPosition(mergedEgg.body, { x: mergeX, y: mergeY });
 			Body.setVelocity(mergedEgg.body, {
 				x: (a.body.velocity.x + b.body.velocity.x) / 2,
 				y: (a.body.velocity.y + b.body.velocity.y) / 2,
@@ -232,6 +242,23 @@ export function Game() {
 
 			if (substeps === GAME_CONFIG.maxSubsteps) {
 				physicsAccumulatorMs = Math.min(physicsAccumulatorMs, GAME_CONFIG.fixedDeltaMs);
+			}
+
+			// Safety check: remove eggs that are out of bounds
+			const eggsToRemove: EggEntity[] = [];
+			for (const egg of physicsWorld.getEggs()) {
+				const margin = egg.displayWidth / 2;
+				if (
+					egg.body.position.x < -margin ||
+					egg.body.position.x > cssWidth + margin ||
+					egg.body.position.y < -margin ||
+					egg.body.position.y > cssHeight + margin
+				) {
+					eggsToRemove.push(egg);
+				}
+			}
+			if (eggsToRemove.length > 0) {
+				physicsWorld.removeEggs(eggsToRemove);
 			}
 
 			draw();
