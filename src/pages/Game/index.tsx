@@ -517,11 +517,11 @@ export function Game() {
 
 	return (
 		<div class="game-page">
-			<a href={withBasePath('/menu')} class="menu-button">
-				<span>☰</span>
+			<a href={withBasePath('/menu')} class="menu-button" aria-label="Menu">
+				<i class="fa-solid fa-bars"></i>
 			</a>
-			<a href={withBasePath('/collection-book')} class="collection-book-button">
-				<span>📘</span>
+			<a href={withBasePath('/collection-book')} class="collection-book-button" aria-label="Collection Book">
+				<i class="fa-solid fa-book"></i>
 			</a>
 			<main ref={mainRef} class="game-main">
 				<canvas ref={canvasRef} class="game-canvas" />
