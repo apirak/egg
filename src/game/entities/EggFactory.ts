@@ -37,8 +37,14 @@ export class EggFactory {
     emoji?: string,
   ): EggEntity {
     const eggColor = color ?? this.randomColor();
-    const eggEmoji = level === 6 ? (emoji ?? getRandomCardEmoji(eggColor)) : undefined;
-    const sprite = getSpriteGenerator().getSpriteForColor(eggColor, level, "main", eggEmoji);
+    const eggEmoji =
+      level === 6 ? (emoji ?? getRandomCardEmoji(eggColor)) : undefined;
+    const sprite = getSpriteGenerator().getSpriteForColor(
+      eggColor,
+      level,
+      "main",
+      eggEmoji,
+    );
     const displayWidth = getGameplayEggSize(sprite.width);
     const displayHeight = getGameplayEggSize(sprite.height);
 
