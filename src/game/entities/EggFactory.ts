@@ -72,7 +72,7 @@ export class EggFactory {
       restitution: 0.08,
       friction: 0.55,
       frictionStatic: 1.4,
-      frictionAir: 0.04,
+      frictionAir: 0.01,
       density: 0.0014,
       slop: 0.01,
       sleepThreshold: 45,
