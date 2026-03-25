@@ -21,11 +21,9 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
 	if (!serviceRef.current) {
 		serviceRef.current = new DeviceOrientationService({
 			onOrientationChange: (data) => {
-				console.log('[useDeviceOrientation] Received orientation:', data);
 				setOrientation(data);
 			},
 			onPermissionChange: (state) => {
-				console.log('[useDeviceOrientation] Permission changed:', state);
 				setPermissionState(state);
 			},
 		});
@@ -38,13 +36,15 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
 
 	const enable = useCallback(() => {
 		if (!serviceRef.current) return;
-		if (permissionState !== 'granted') {
-			console.warn('Cannot enable: permission not granted');
+		// Use the service's current permission state directly
+		const actualState = serviceRef.current.getPermissionState();
+		if (actualState !== 'granted') {
+			console.warn('[useDeviceOrientation] Cannot enable: permission state =', actualState);
 			return;
 		}
 		serviceRef.current.start();
 		setIsEnabled(true);
-	}, [permissionState]);
+	}, []);
 
 	const disable = useCallback(() => {
 		if (!serviceRef.current) return;

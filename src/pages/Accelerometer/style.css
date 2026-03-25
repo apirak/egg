@@ -1,0 +1,32 @@
+.accelerometer-page {
+	height: 100vh;
+	height: 100dvh;
+	width: 100vw;
+	background: #667eea;
+	overscroll-behavior: none;
+	overflow: hidden;
+}
+
+.accelerometer-main {
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-touch-callout: none;
+	overscroll-behavior: none;
+	touch-action: none;
+	position: relative;
+}
+
+.accelerometer-canvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+	touch-action: none;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: pointer;
+}

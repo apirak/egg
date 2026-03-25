@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { Body, Collision } from 'matter-js';
 import { EggFactory } from '../../game/entities';
 import { GameLoop, PhysicsWorld } from '../../game/core';
@@ -19,69 +19,57 @@ export function Game() {
 	const orientationRef = useRef<{ beta: number; gamma: number; gravityX: number; gravityY: number } | null>(null);
 	const tiltEnabledRef = useRef(false);
 
+	const [showTiltModal, setShowTiltModal] = useState(false);
+
 	const {
 		orientation,
-		permissionState,
 		isEnabled: tiltEnabled,
 		isSupported: tiltSupported,
 		requestPermission,
 		toggle: toggleTilt,
 	} = useDeviceOrientation();
 
-	// Keep orientation ref updated for draw function
+	// Keep refs updated
 	useEffect(() => {
 		orientationRef.current = orientation;
 	}, [orientation]);
 
-	// Keep tiltEnabled ref updated for draw function
 	useEffect(() => {
 		tiltEnabledRef.current = tiltEnabled;
 	}, [tiltEnabled]);
 
-	// Update gravity when orientation changes
+	// Show modal if tilt is supported but not enabled after a delay
 	useEffect(() => {
-		const physicsWorld = physicsWorldRef.current;
-		if (!physicsWorld || !tiltEnabled || !orientation) {
-			console.log('[Game] Gravity update skipped:', {
-				hasPhysicsWorld: !!physicsWorld,
-				tiltEnabled,
-				hasOrientation: !!orientation,
-				orientation,
-			});
-			return;
-		}
+		if (!tiltSupported) return;
 
-		console.log('[Game] Updating gravity:', orientation.gravityX, orientation.gravityY);
-		physicsWorld.setGravity(orientation.gravityX, orientation.gravityY);
-	}, [orientation, tiltEnabled]);
-
-	// Reset gravity when tilt is disabled
-	useEffect(() => {
-		const physicsWorld = physicsWorldRef.current;
-		if (!physicsWorld || tiltEnabled) return;
-
-		physicsWorld.resetGravity();
-	}, [tiltEnabled]);
-
-	// Handle permission request
-	const handleEnableTilt = async () => {
-		if (permissionState === 'prompt') {
-			const state = await requestPermission();
-			if (state === 'granted') {
-				toggleTilt();
+		// Check if iOS (requires permission)
+		if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
+			const DeviceOrientationEvent = window.DeviceOrientationEvent as any;
+			if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+				// iOS - show modal if not enabled after 2 seconds
+				const timer = setTimeout(() => {
+					if (!tiltEnabledRef.current) {
+						setShowTiltModal(true);
+					}
+				}, 2000);
+				return () => clearTimeout(timer);
 			}
-		} else if (permissionState === 'granted') {
+		}
+	}, [tiltSupported]);
+
+	// Handle enable tilt from modal
+	const handleEnableTilt = async () => {
+		setShowTiltModal(false);
+		const state = await requestPermission();
+		if (state === 'granted') {
 			toggleTilt();
 		}
 	};
 
-	// Auto-enable tilt on mount for supported devices
+	// Auto-enable tilt on mount (hidden, no button shown)
 	useEffect(() => {
 		if (!tiltSupported) return;
 
-		// For iOS 13+, we need user interaction to request permission
-		// So we'll just prepare it, actual enable happens on first button click
-		// For non-iOS devices, we can auto-start
 		if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
 			const DeviceOrientationEvent = window.DeviceOrientationEvent as any;
 			if (typeof DeviceOrientationEvent.requestPermission !== 'function') {
@@ -94,6 +82,22 @@ export function Game() {
 			}
 		}
 	}, []); // Run once on mount
+
+	// Update gravity when orientation changes
+	useEffect(() => {
+		const physicsWorld = physicsWorldRef.current;
+		if (!physicsWorld || !tiltEnabled || !orientation) return;
+
+		physicsWorld.setGravity(orientation.gravityX, orientation.gravityY);
+	}, [orientation, tiltEnabled]);
+
+	// Reset gravity when tilt is disabled
+	useEffect(() => {
+		const physicsWorld = physicsWorldRef.current;
+		if (!physicsWorld || tiltEnabled) return;
+
+		physicsWorld.resetGravity();
+	}, [tiltEnabled]);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -160,102 +164,32 @@ export function Game() {
 				24,
 			);
 
-			// Draw tilt indicator when tilt is supported
+			// Draw tilt indicator dot
 			if (tiltSupported) {
-				drawTiltIndicator(ctx, cssWidth, cssHeight, tiltEnabledRef.current, orientationRef.current);
+				const dotX = cssWidth - 20;
+				const dotY = 20;
+				const dotRadius = 8;
+
+				// Outer ring
+				ctx.beginPath();
+				ctx.arc(dotX, dotY, dotRadius + 2, 0, Math.PI * 2);
+				ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+
+				// Dot
+				ctx.beginPath();
+				ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+				ctx.fillStyle = tiltEnabledRef.current ? '#2ecc71' : 'rgba(0, 0, 0, 0.3)';
+				ctx.fill();
+
+				// Icon
+				ctx.font = '10px system-ui, sans-serif';
+				ctx.fillStyle = tiltEnabledRef.current ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText('📱', dotX, dotY);
 			}
-		};
-
-		const drawTiltIndicator = (
-			ctx: CanvasRenderingContext2D,
-			width: number,
-			height: number,
-			isEnabled: boolean,
-			orient: { beta: number; gamma: number; gravityX: number; gravityY: number } | null,
-		) => {
-			// Debug log every ~60 frames (once per second)
-			if (Math.random() < 0.016) {
-				console.log('[drawTiltIndicator] Drawing:', {
-					isEnabled,
-					hasOrientation: !!orient,
-					orient,
-				});
-			}
-
-			const centerX = width / 2;
-			const centerY = height / 2;
-			const radius = 40;
-
-			// Background circle
-			ctx.beginPath();
-			ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-			ctx.fillStyle = isEnabled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(200, 200, 200, 0.7)';
-			ctx.fill();
-			ctx.strokeStyle = isEnabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.15)';
-			ctx.lineWidth = 2;
-			ctx.stroke();
-
-			// Direction line based on gravity (only when enabled and has orientation data)
-			if (isEnabled && orient) {
-				const gravityMagnitude = Math.sqrt(orient.gravityX ** 2 + orient.gravityY ** 2);
-				const maxGravity = GAME_CONFIG.tilt.maxTiltAngle * GAME_CONFIG.tilt.gravityScale;
-				const lineLength = (gravityMagnitude / maxGravity) * (radius - 6);
-
-				// Draw direction line
-				if (lineLength > 2) {
-					const angle = Math.atan2(orient.gravityY, orient.gravityX);
-					const endX = centerX + Math.cos(angle) * lineLength;
-					const endY = centerY + Math.sin(angle) * lineLength;
-					const startX = centerX - Math.cos(angle) * lineLength;
-					const startY = centerY - Math.sin(angle) * lineLength;
-
-					ctx.beginPath();
-					ctx.moveTo(startX, startY);
-					ctx.lineTo(endX, endY);
-					ctx.strokeStyle = '#667eea';
-					ctx.lineWidth = 3;
-					ctx.lineCap = 'round';
-					ctx.stroke();
-
-					// Arrow head at end
-					const arrowSize = 6;
-					ctx.beginPath();
-					ctx.moveTo(endX, endY);
-					ctx.lineTo(
-						endX - arrowSize * Math.cos(angle - Math.PI / 6),
-						endY - arrowSize * Math.sin(angle - Math.PI / 6),
-					);
-					ctx.moveTo(endX, endY);
-					ctx.lineTo(
-						endX - arrowSize * Math.cos(angle + Math.PI / 6),
-						endY - arrowSize * Math.sin(angle + Math.PI / 6),
-					);
-					ctx.stroke();
-				}
-			}
-
-			// Center dot "o"
-			ctx.beginPath();
-			ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
-			ctx.fillStyle = isEnabled ? '#667eea' : '#999';
-			ctx.fill();
-
-			// Direction labels
-			ctx.font = '12px system-ui, sans-serif';
-			ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-			ctx.textAlign = 'center';
-			ctx.fillText('↓', centerX, centerY + radius + 16); // Down
-			ctx.fillText('↑', centerX, centerY - radius - 8); // Up
-			ctx.textAlign = 'left';
-			ctx.fillText('←', centerX - radius - 8, centerY + 4); // Left
-			ctx.textAlign = 'right';
-			ctx.fillText('→', centerX + radius + 8, centerY + 4); // Right
-
-			// Status text
-			ctx.font = '11px system-ui, sans-serif';
-			ctx.textAlign = 'center';
-			ctx.fillStyle = isEnabled ? 'rgba(102, 126, 234, 0.8)' : 'rgba(150, 150, 150, 0.8)';
-			ctx.fillText(isEnabled ? 'TILT ON' : 'TILT OFF', centerX, centerY + radius + 32);
 		};
 
 		const tryMergeOnePair = (): boolean => {
@@ -428,17 +362,28 @@ export function Game() {
 	return (
 		<div class="game-page">
 			<main ref={mainRef} class="game-main">
-				{tiltSupported && (
-					<button
-						class={`tilt-toggle ${tiltEnabled ? 'active' : ''}`}
-						onClick={handleEnableTilt}
-						aria-label={tiltEnabled ? 'Disable tilt control' : 'Enable tilt control'}
-					>
-						{tiltEnabled ? '📱 Tilt ON' : '📱 Tilt OFF'}
-					</button>
-				)}
 				<canvas ref={canvasRef} class="game-canvas" />
 			</main>
+
+			{/* Tilt Permission Modal */}
+			{showTiltModal && (
+				<div class="tilt-modal-overlay" onClick={() => setShowTiltModal(false)}>
+					<div class="tilt-modal" onClick={(e) => e.stopPropagation()}>
+						<div class="tilt-modal-content">
+							<h2>📱 Enable Tilt Control</h2>
+							<p>Control gravity by tilting your device!</p>
+							<div class="tilt-modal-buttons">
+								<button class="tilt-modal-btn primary" onClick={handleEnableTilt}>
+									Enable
+								</button>
+								<button class="tilt-modal-btn secondary" onClick={() => setShowTiltModal(false)}>
+									Later
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -6,6 +6,7 @@ export function Navigation() {
 		{ id: 'game', title: 'Play Game', description: 'Start the egg merge game', route: '/game', icon: '🎮' },
 		{ id: 'collection', title: 'Egg Collection', description: 'View all egg types', route: '/collection', icon: '🥚' },
 		{ id: 'egg-shape', title: 'Egg Geometry', description: 'Learn about egg shapes', route: '/egg-shape', icon: '📐' },
+		{ id: 'accelerometer', title: 'Accelerometer', description: 'Test tilt controls', route: '/accelerometer', icon: '📱' },
 	];
 
 	return (
