@@ -794,6 +794,10 @@ export function saveCollection(collection: CardCollection): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(collection));
 }
 
+export function resetCollection(): void {
+  saveCollection(getEmptyCollection());
+}
+
 export function addCard(color: EggColor, emoji: string): void {
   const collection = getCollection();
   collection[color][emoji] = (collection[color][emoji] || 0) + 1;

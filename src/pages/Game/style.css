@@ -93,7 +93,7 @@
 .collection-book-button {
 	position: fixed;
 	top: 16px;
-	right: 16px;
+	right: 8px;
 	width: 44px;
 	height: 44px;
 	background: rgba(255, 255, 255, 0.9);
@@ -148,7 +148,7 @@
 .debug-level6-hotspot {
 	position: absolute;
 	top: 2px;
-	right: 2px;
+	right: 46px;
 	width: 36px;
 	height: 36px;
 	border: none;

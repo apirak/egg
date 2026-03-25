@@ -62,7 +62,6 @@
 	border-radius: 0.75rem;
 	border: none;
 	overflow: hidden;
-	box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.15));
 	z-index: 2;
 }
 
@@ -84,7 +83,7 @@
 }
 
 .card-front.legendary {
-	box-shadow: 0 2px 12px var(--shadow-color, rgba(234, 179, 8, 0.3));
+	/* shadow removed */
 }
 
 /* Holographic Overlay */

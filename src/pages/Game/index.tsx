@@ -183,7 +183,7 @@ export function Game() {
 
 			// Draw tilt indicator dot
 			if (tiltSupported) {
-				const dotX = cssWidth - 20;
+				const dotX = cssWidth - 64;
 				const dotY = 20;
 				const dotRadius = 4;
 
