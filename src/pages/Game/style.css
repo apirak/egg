@@ -36,8 +36,54 @@
 	user-select: none;
 }
 
+.tilt-toggle {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	padding: 12px 20px;
+	background: rgba(255, 255, 255, 0.95);
+	border: 2px solid #e9ecef;
+	border-radius: 24px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #495057;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transition: all 0.2s ease;
+	z-index: 100;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.tilt-toggle:hover {
+	background: #ffffff;
+	border-color: #adb5bd;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tilt-toggle:active {
+	transform: scale(0.95);
+}
+
+.tilt-toggle.active {
+	background: #667eea;
+	color: #ffffff;
+	border-color: #667eea;
+}
+
+.tilt-toggle.active:hover {
+	background: #5a6fd6;
+}
+
 @media (max-width: 768px) {
 	.game-main {
 		padding: 0;
+	}
+
+	.tilt-toggle {
+		top: 12px;
+		right: 12px;
+		padding: 10px 16px;
+		font-size: 13px;
 	}
 }

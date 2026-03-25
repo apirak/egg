@@ -9,6 +9,7 @@ export class PhysicsWorld {
   private height: number;
   private walls: Body[] = [];
   private eggs: EggEntity[] = [];
+  private currentGravity: { x: number; y: number };
 
   constructor(
     width: number = GAME_CONFIG.width,
@@ -17,6 +18,7 @@ export class PhysicsWorld {
     this.width = width;
     this.height = height;
 
+    this.currentGravity = { x: 0, y: GAME_CONFIG.gravityY };
     this.engine = Engine.create({
       gravity: { x: 0, y: GAME_CONFIG.gravityY },
       enableSleeping: true,
@@ -25,6 +27,20 @@ export class PhysicsWorld {
       constraintIterations: 6,
     });
     this.buildWalls();
+  }
+
+  setGravity(x: number, y: number): void {
+    this.currentGravity = { x, y };
+    this.engine.world.gravity.x = x;
+    this.engine.world.gravity.y = y;
+  }
+
+  getGravity(): { x: number; y: number } {
+    return this.currentGravity;
+  }
+
+  resetGravity(): void {
+    this.setGravity(0, GAME_CONFIG.gravityY);
   }
 
   resize(width: number, height: number): void {

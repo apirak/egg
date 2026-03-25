@@ -6,6 +6,7 @@ import { GAME_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
 import type { EggColor, EggLevel } from '../../types/egg';
 import { EGG_COLORS } from '../../game/config/EggConfig';
+import { useDeviceOrientation } from '../../hooks/useDeviceOrientation';
 import './style.css';
 
 /**
@@ -14,6 +15,44 @@ import './style.css';
 export function Game() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const mainRef = useRef<HTMLElement>(null);
+	const physicsWorldRef = useRef<PhysicsWorld | null>(null);
+
+	const {
+		orientation,
+		permissionState,
+		isEnabled: tiltEnabled,
+		isSupported: tiltSupported,
+		requestPermission,
+		toggle: toggleTilt,
+	} = useDeviceOrientation();
+
+	// Update gravity when orientation changes
+	useEffect(() => {
+		const physicsWorld = physicsWorldRef.current;
+		if (!physicsWorld || !tiltEnabled || !orientation) return;
+
+		physicsWorld.setGravity(orientation.gravityX, orientation.gravityY);
+	}, [orientation, tiltEnabled]);
+
+	// Reset gravity when tilt is disabled
+	useEffect(() => {
+		const physicsWorld = physicsWorldRef.current;
+		if (!physicsWorld || tiltEnabled) return;
+
+		physicsWorld.resetGravity();
+	}, [tiltEnabled]);
+
+	// Handle permission request
+	const handleEnableTilt = async () => {
+		if (permissionState === 'prompt') {
+			const state = await requestPermission();
+			if (state === 'granted') {
+				toggleTilt();
+			}
+		} else if (permissionState === 'granted') {
+			toggleTilt();
+		}
+	};
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -24,6 +63,7 @@ export function Game() {
 		let cssHeight = GAME_CONFIG.height;
 
 		const physicsWorld = new PhysicsWorld(cssWidth, cssHeight);
+		physicsWorldRef.current = physicsWorld;
 		const eggFactory = new EggFactory();
 		const mergeSystem = new MergeSystem();
 		const ascendedCount = EGG_COLORS.reduce((acc, color) => {
@@ -250,6 +290,15 @@ export function Game() {
 	return (
 		<div class="game-page">
 			<main ref={mainRef} class="game-main">
+				{tiltSupported && (
+					<button
+						class={`tilt-toggle ${tiltEnabled ? 'active' : ''}`}
+						onClick={handleEnableTilt}
+						aria-label={tiltEnabled ? 'Disable tilt control' : 'Enable tilt control'}
+					>
+						{tiltEnabled ? '📱 Tilt ON' : '📱 Tilt OFF'}
+					</button>
+				)}
 				<canvas ref={canvasRef} class="game-canvas" />
 			</main>
 		</div>
