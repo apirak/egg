@@ -130,12 +130,18 @@
 .card-stage.flying {
   position: fixed;
   z-index: 1001;
-  transition: transform 60ms linear;
+  transition: transform 50ms linear, opacity 50ms linear;
+  /* Use absolute position for curved path */
   transform: translate(
-    calc(var(--fly-x, 0) * var(--fly-progress, 0)),
-    calc(var(--fly-y, 0) * var(--fly-progress, 0))
-  ) scale(calc(1 - var(--fly-progress, 0) * 0.85));
-  opacity: calc(1 - var(--fly-progress, 0) * 0.3);
+    var(--fly-current-x, 0),
+    var(--fly-current-y, 0)
+  ) scale(calc(1 - var(--fly-progress, 0) * 0.7));
+  opacity: calc(1 - var(--fly-progress, 0));
+}
+
+/* Override closing styles when flying */
+.card-stage.closing.flying {
+  opacity: calc(1 - var(--fly-progress, 0));
 }
 
 .card-stage.flying .card-3d-container {

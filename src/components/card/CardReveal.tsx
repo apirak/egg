@@ -13,8 +13,12 @@ interface CardRevealProps {
 
 interface FlyAnimation {
   isFlying: boolean;
-  targetX: number;
-  targetY: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  currentX: number;
+  currentY: number;
   progress: number;
 }
 
@@ -49,8 +53,12 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
   const [particleFrames, setParticleFrames] = useState<BurstParticleFrame[]>([]);
   const [flyAnimation, setFlyAnimation] = useState<FlyAnimation>({
     isFlying: false,
-    targetX: 0,
-    targetY: 0,
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+    currentX: 0,
+    currentY: 0,
     progress: 0,
   });
 
@@ -82,7 +90,7 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
   const startClose = useCallback(() => {
     if (isClosing || stage !== 'card') return;
     setIsClosing(true);
-    setIsCardFlipped(false);
+    setIsCardFlipped(true); // Flip card when starting to fly
 
     // Get collection book button position
     const bookButton = document.querySelector('.collection-book-button') as HTMLElement;
@@ -106,25 +114,42 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
     const deltaX = targetCenterX - currentCenterX;
     const deltaY = targetCenterY - currentCenterY;
 
+    // Calculate control point for quadratic bezier curve (curved upward)
+    const controlX = currentCenterX + deltaX * 0.5;
+    const controlY = Math.min(currentCenterY, targetCenterY) - 100; // Curve up 100px
+
     setFlyAnimation({
       isFlying: true,
-      targetX: deltaX,
-      targetY: deltaY,
+      startX: 0,
+      startY: 0,
+      endX: deltaX,
+      endY: deltaY,
+      currentX: 0,
+      currentY: 0,
       progress: 0,
     });
 
-    // Animate card flying to book
-    const flyDuration = 600;
+    // Animate card flying to book with curved path
+    const flyDuration = 1000; // Slower for better curve visibility
     const startTime = performance.now();
 
     const animateFly = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(1, elapsed / flyDuration);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      // Ease-out cubic - fast start, slow end
+      const t = 1 - Math.pow(1 - progress, 3);
+
+      // Quadratic bezier curve: B(t) = (1-t)²*P0 + 2(1-t)t*P1 + t²*P2
+      // P0 = (0, 0), P1 = (controlX - startX, controlY - startY), P2 = (deltaX, deltaY)
+      const mt = 1 - t;
+      const curveX = mt * mt * 0 + 2 * mt * t * (controlX - currentCenterX) + t * t * deltaX;
+      const curveY = mt * mt * 0 + 2 * mt * t * (controlY - currentCenterY) + t * t * deltaY;
 
       setFlyAnimation((prev) => ({
         ...prev,
-        progress: eased,
+        currentX: curveX,
+        currentY: curveY,
+        progress: t,
       }));
 
       if (progress < 1) {
@@ -256,8 +281,8 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
         class={`card-stage ${stage} ${isClosing ? 'closing' : ''} ${flyAnimation.isFlying ? 'flying' : ''}`}
         style={{
           '--entry-duration': `${cfg.cardEntryDurationMs}ms`,
-          '--fly-x': flyAnimation.isFlying ? `${flyAnimation.targetX}px` : '0',
-          '--fly-y': flyAnimation.isFlying ? `${flyAnimation.targetY}px` : '0',
+          '--fly-current-x': flyAnimation.isFlying ? `${flyAnimation.currentX}px` : '0',
+          '--fly-current-y': flyAnimation.isFlying ? `${flyAnimation.currentY}px` : '0',
           '--fly-progress': flyAnimation.progress,
         }}
         onClick={(event) => {
