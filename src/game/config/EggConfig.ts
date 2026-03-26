@@ -112,6 +112,16 @@ export const DEFAULT_EGG_FORMULA = {
 };
 
 /**
+ * Merge burst tuning used when two eggs combine.
+ * These values control how strongly nearby eggs are pushed away.
+ */
+export const EGG_MERGE_BURST_CONFIG = {
+  radiusMultiplier: 3,
+  maxPushForce: 0.1,
+  maxVelocityAfterPush: 9,
+};
+
+/**
  * Generate all egg type combinations (5 colors × 6 levels = 30 total)
  */
 export function getAllEggTypes(): EggType[] {

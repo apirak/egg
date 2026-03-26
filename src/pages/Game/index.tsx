@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Body, Collision } from 'matter-js';
 import { EggFactory, type EggEntity } from '../../game/entities';
 import { GameLoop, PhysicsWorld } from '../../game/core';
-import { GAME_CONFIG } from '../../game/config';
+import { GAME_CONFIG, EGG_MERGE_BURST_CONFIG } from '../../game/config';
 import { MergeSystem } from '../../game/systems';
 import type { EggLevel } from '../../types/egg';
 import { CardReveal } from '../../components/card/CardReveal';
@@ -15,6 +15,19 @@ import './style.css';
  * Game Page - Placeholder for Step 4
  */
 export function Game() {
+	type MergeSparkle = {
+		x: number;
+		y: number;
+		vx: number;
+		vy: number;
+		lifeMs: number;
+		maxLifeMs: number;
+		sizePx: number;
+		rotation: number;
+		spin: number;
+		emoji: string;
+	};
+
 	const isDebugMode = import.meta.env.DEV;
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const mainRef = useRef<HTMLElement>(null);
@@ -141,6 +154,8 @@ export function Game() {
 		physicsWorldRef.current = physicsWorld;
 		const eggFactory = new EggFactory();
 		const mergeSystem = new MergeSystem();
+		const mergeSparkles: MergeSparkle[] = [];
+		const maxMergeSparkles = 80;
 
 		const setupCanvas = () => {
 			const rect = main.getBoundingClientRect();
@@ -158,7 +173,37 @@ export function Game() {
 
 		setupCanvas();
 
-		const draw = () => {
+		const drawMergeSparkles = (ctx: CanvasRenderingContext2D, deltaMs: number) => {
+			for (let i = mergeSparkles.length - 1; i >= 0; i--) {
+				const sparkle = mergeSparkles[i];
+				sparkle.lifeMs -= deltaMs;
+				if (sparkle.lifeMs <= 0) {
+					mergeSparkles.splice(i, 1);
+					continue;
+				}
+
+				sparkle.x += sparkle.vx * (deltaMs / 16.667);
+				sparkle.y += sparkle.vy * (deltaMs / 16.667);
+				sparkle.vx *= 0.96;
+				sparkle.vy = sparkle.vy * 0.96 + 0.03;
+				sparkle.rotation += sparkle.spin * (deltaMs / 16.667);
+
+				const t = 1 - sparkle.lifeMs / sparkle.maxLifeMs;
+				const alpha = t < 0.25 ? t / 0.25 : 1 - (t - 0.25) / 0.75;
+
+				ctx.save();
+				ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+				ctx.translate(sparkle.x, sparkle.y);
+				ctx.rotate(sparkle.rotation);
+				ctx.font = `${sparkle.sizePx}px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(sparkle.emoji, 0, 0);
+				ctx.restore();
+			}
+		};
+
+		const draw = (deltaMs: number) => {
 			const ctx = canvas.getContext('2d');
 			if (!ctx) return;
 
@@ -180,6 +225,8 @@ export function Game() {
 				);
 				ctx.restore();
 			}
+
+			drawMergeSparkles(ctx, deltaMs);
 
 			// Draw tilt indicator dot
 			if (tiltSupported) {
@@ -224,9 +271,9 @@ export function Game() {
 			const nextLevel = (a.level + 1) as EggLevel;
 			const mergedEgg = eggFactory.createEgg(mergeX, mergeY, nextLevel, a.color);
 
-			// Clear space for merged egg: gently push nearby eggs away from merge point
-			const clearRadius = mergedEgg.displayWidth * 0.8;
-			const pushForce = 0.008;
+			// Cute burst: soft radial push to make neighboring eggs wiggle away.
+			const clearRadius = mergedEgg.displayWidth * EGG_MERGE_BURST_CONFIG.radiusMultiplier;
+			const maxPushForce = EGG_MERGE_BURST_CONFIG.maxPushForce;
 
 			for (const egg of physicsWorld.getEggs()) {
 				const dx = egg.body.position.x - mergeX;
@@ -234,11 +281,43 @@ export function Game() {
 				const dist = Math.sqrt(dx * dx + dy * dy);
 
 				if (dist < clearRadius && dist > 0) {
-					// Push away gently
-					const forceX = (dx / dist) * pushForce;
-					const forceY = (dy / dist) * pushForce;
+					const influence = 1 - dist / clearRadius;
+					const magnitude = maxPushForce * influence * influence;
+					const forceX = (dx / dist) * magnitude;
+					const forceY = (dy / dist) * magnitude;
 					Body.applyForce(egg.body, egg.body.position, { x: forceX, y: forceY });
+
+					const speed = Math.hypot(egg.body.velocity.x, egg.body.velocity.y);
+					if (speed > EGG_MERGE_BURST_CONFIG.maxVelocityAfterPush) {
+						const clamp = EGG_MERGE_BURST_CONFIG.maxVelocityAfterPush / speed;
+						Body.setVelocity(egg.body, {
+							x: egg.body.velocity.x * clamp,
+							y: egg.body.velocity.y * clamp,
+						});
+					}
 				}
+			}
+
+			const sparkleCount = 6 + Math.floor(Math.random() * 5);
+			for (let i = 0; i < sparkleCount; i++) {
+				const angle = (Math.PI * 2 * i) / sparkleCount + (Math.random() - 0.5) * 0.6;
+				const speed = 1.2 + Math.random() * 2.4;
+				mergeSparkles.push({
+					x: mergeX + (Math.random() - 0.5) * 10,
+					y: mergeY + (Math.random() - 0.5) * 10,
+					vx: Math.cos(angle) * speed,
+					vy: Math.sin(angle) * speed - 0.8,
+					lifeMs: 320 + Math.random() * 220,
+					maxLifeMs: 320 + Math.random() * 220,
+					sizePx: 10 + Math.random() * 8,
+					rotation: Math.random() * Math.PI * 2,
+					spin: (Math.random() - 0.5) * 0.28,
+					emoji: Math.random() > 0.7 ? '⭐' : '✨',
+				});
+			}
+
+			if (mergeSparkles.length > maxMergeSparkles) {
+				mergeSparkles.splice(0, mergeSparkles.length - maxMergeSparkles);
 			}
 
 			// Place merged egg at merge position
@@ -292,7 +371,7 @@ export function Game() {
 				physicsWorld.removeEggs(eggsToRemove);
 			}
 
-			draw();
+			draw(deltaMs);
 		});
 		loop.start();
 

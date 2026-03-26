@@ -11,6 +11,7 @@ export {
   getEggDisplayName,
   getEggSize,
   getGameplayEggSize,
+  EGG_MERGE_BURST_CONFIG,
   ALL_EGG_CONFIGS,
 } from "./EggConfig";
 
