@@ -393,7 +393,7 @@
 }
 
 .card-lore-text {
-	font-size: 0.9rem;
+	font-size: 1.1rem;
 	color: rgba(255, 255, 255, 0.85);
 	line-height: 0.4;
 	margin-bottom: 0.4rem;
@@ -413,7 +413,7 @@
 }
 
 .ability-label {
-	font-size: 0.65rem;
+	font-size: 0.75rem;
 	font-weight: 400;
 	color: rgba(255, 255, 255, 0.6);
 	letter-spacing: 0.05em;
@@ -422,7 +422,7 @@
 }
 
 .ability-text {
-	font-size: 0.75rem;
+	font-size: 1rem;
 	color: rgba(255, 255, 255, 0.9);
 	margin: 0;
 	line-height: 1.4;
@@ -454,33 +454,3 @@
 	color: #fbbf24;
 }
 
-/* Rarity Glow */
-.card-rarity-glow {
-	position: absolute;
-	inset: 0;
-	border-radius: 0.75rem;
-	pointer-events: none;
-	filter: blur(0.75rem);
-	z-index: -1;
-}
-
-.card-rarity-glow.epic {
-	background-color: rgba(168, 85, 247, 0.2);
-}
-
-.card-rarity-glow.legendary {
-	background-color: rgba(234, 179, 8, 0.2);
-}
-
-.card-rarity-glow.pulse {
-	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-	0%, 100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.5;
-	}
-}

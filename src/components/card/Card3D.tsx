@@ -143,9 +143,6 @@ export function Card3D({ card, isFlipped = false, onFlip, showCount, size = 'md'
 
           {/* Lore Content - Centered */}
           <div class="card-lore-content">
-            <div class="card-lore-header">
-              <h4>ประวัติการ์ด</h4>
-            </div>
             {card.lore.map((line: string, idx: number) => (
               <p key={idx} class="card-lore-text">
                 {line}
@@ -165,13 +162,6 @@ export function Card3D({ card, isFlipped = false, onFlip, showCount, size = 'md'
           </div>
         </div>
       </div>
-
-      {/* Rarity glow effect for legendary/epic */}
-      {(card.rarity === 'legendary' || card.rarity === 'epic') && (
-        <div
-          class={`card-rarity-glow ${card.rarity} ${isHovered ? 'pulse' : ''}`}
-        />
-      )}
     </div>
   );
 }

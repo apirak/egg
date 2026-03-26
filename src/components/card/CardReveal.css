@@ -3,19 +3,19 @@
 .card-reveal-container {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   background: transparent;
   z-index: 1000;
   perspective: 1200px;
 }
 
 .card-reveal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   background: rgba(10, 11, 16, 0.62);
@@ -25,6 +25,7 @@
   line-height: 1;
   cursor: pointer;
   z-index: 5;
+  flex-shrink: 0;
 }
 
 .card-reveal-close:hover {

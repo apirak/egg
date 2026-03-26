@@ -220,18 +220,6 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
       onClick={startClose}
       aria-label="Card reveal"
     >
-      <button
-        type="button"
-        class="card-reveal-close"
-        onClick={(event) => {
-          event.stopPropagation();
-          startClose();
-        }}
-        aria-label="Close reveal"
-      >
-        x
-      </button>
-
       <div class={`egg-pop ${eggColor} ${stage}`}>
         <div
           class="egg-pop-core"
@@ -283,6 +271,18 @@ export function CardReveal({ card, onComplete, eggColor, origin }: CardRevealPro
           onFlip={() => setIsCardFlipped((prev) => !prev)}
         />
       </div>
+
+      <button
+        type="button"
+        class="card-reveal-close"
+        onClick={(event) => {
+          event.stopPropagation();
+          startClose();
+        }}
+        aria-label="Close reveal"
+      >
+        ✕
+      </button>
     </div>
   );
 }

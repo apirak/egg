@@ -38,7 +38,7 @@ export const GRAY_CARDS: Card[] = [
     id: "#035",
     emoji: "⛈️",
     color: "gray",
-    nameTH: "พายุฟ้าคะนองแห่งความรู้",
+    nameTH: "พายุฟ้าแห่งความรู้",
     nameEN: "Knowledge Thunder",
     stats: { mind: 70, body: 45, spirit: 55 },
     rarity: "common",
