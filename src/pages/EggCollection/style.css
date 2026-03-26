@@ -80,7 +80,7 @@
 .color-name {
 	font-size: 1.3rem;
 	font-weight: 700;
-	color: #333;
+	color: var(--color-text);
 }
 
 .level-grid {
@@ -91,7 +91,7 @@
 }
 
 .egg-card {
-	background: #f8f9fa;
+	background: var(--color-surface);
 	border-radius: 12px;
 	padding: 16px;
 	cursor: pointer;
@@ -105,12 +105,12 @@
 
 .egg-card:hover {
 	transform: translateY(-4px);
-	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 8px 25px rgba(255, 133, 102, 0.15);
 }
 
 .egg-card.selected {
-	border-color: #667eea;
-	background: #f0f4ff;
+	border-color: var(--color-primary);
+	background: rgba(255, 133, 102, 0.1);
 }
 
 .egg-visual {

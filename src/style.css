@@ -7,14 +7,19 @@
 	line-height: 1.5;
 	font-weight: 400;
 
-	/* Design tokens */
-	--color-primary: #667eea;
-	--color-secondary: #764ba2;
-	--color-accent: #e74c3c;
+	/* Design tokens - Warm & Playful Palette */
+	--color-primary: #FF8566;
+	--color-secondary: #FFB347;
+	--color-accent: #FF6B9D;
 
-	--color-egg-red: #e74c3c;
-	--color-egg-blue: #3498db;
-	--color-egg-green: #2ecc71;
+	--color-egg-red: #FF6B6B;
+	--color-egg-blue: #6BB6FF;
+	--color-egg-green: #6BCF7F;
+
+	--color-background: #FFF9F0;
+	--color-surface: #FFFCF7;
+	--color-text: #3D2E1F;
+	--color-text-muted: #8B7355;
 
 	--spacing-xs: 4px;
 	--spacing-sm: 8px;
@@ -46,6 +51,8 @@
 body {
 	margin: 0;
 	padding: 0;
+	background: var(--color-background);
+	color: var(--color-text);
 	/* Prevent zoom and unwanted gestures */
 	touch-action: pan-x pan-y;
 	-webkit-touch-callout: none;
