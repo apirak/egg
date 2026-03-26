@@ -30,7 +30,7 @@ export const EGG_COLOR_INFO: Record<EggColor, { name: string; emoji: string }> =
 /**
  * Size multiplier for each level (1.2x per level)
  */
-const BASE_SIZE_MULTIPLIER = 2;
+const BASE_SIZE_MULTIPLIER = 1.5;
 export const EGG_SIZE_MULTIPLIERS: Record<EggLevel, number> = {
   1: BASE_SIZE_MULTIPLIER * 1.0,
   2: BASE_SIZE_MULTIPLIER * 1.2,
