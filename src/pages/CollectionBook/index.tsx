@@ -39,7 +39,7 @@ export function CollectionBookPage() {
 				))}
 
 				<section
-					class="collection-book"
+					class="collection-book collection-book-bonus"
 					style={{
 						'--book-accent': '#fbbf24',
 						'--book-glow': 'rgba(251, 191, 36, 0.18)',
@@ -59,7 +59,7 @@ export function CollectionBookPage() {
 						</button>
 					</header>
 
-					<div class="collection-bonus-grid">
+					<div class="collection-book-grid" role="list" aria-label="Bonus card collection">
 						{SETS.map((setColor) => (
 							<CollectionBonusSlot key={setColor} setColor={setColor} isComplete={isSetComplete(setColor)} />
 						))}

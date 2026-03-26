@@ -122,30 +122,54 @@ export function CollectionBook({ setColor, collection, onCardClick }: Collection
 interface CollectionBonusSlotProps {
 	setColor: EggColor;
 	isComplete: boolean;
+	bonusCard?: Card;
+	onCardClick?: (card: Card) => void;
 }
 
-export function CollectionBonusSlot({ setColor, isComplete }: CollectionBonusSlotProps) {
+export function CollectionBonusSlot({ setColor, isComplete, bonusCard, onCardClick }: CollectionBonusSlotProps) {
 	const accent = BOOK_ACCENTS[setColor];
 	const setInfo = EGG_COLOR_INFO[setColor];
 
+	// If unlocked and has a bonus card, show the filled slot
+	if (isComplete && bonusCard) {
+		return (
+			<button
+				type="button"
+				class="collection-slot collection-slot-filled collection-bonus-slot-unlocked"
+				onClick={() => onCardClick?.(bonusCard)}
+				style={{
+					'--book-accent': accent.edge,
+					'--book-glow': accent.glow,
+				}}
+			>
+				<div class="collection-slot-card-shell">
+					<Card3D card={bonusCard} size="lg" />
+				</div>
+			</button>
+		);
+	}
+
+	// Locked state - show as empty slot with lock icon
+	const lockEmojiUrl = getTwemojiSvgUrl('🔒');
+	const embossStyle = {
+		'--emboss-icon': `url("${lockEmojiUrl}")`,
+	} as Record<string, string>;
+
 	return (
 		<div
-			class={`collection-bonus-slot ${isComplete ? 'unlocked' : 'locked'}`}
+			class="collection-slot collection-slot-empty collection-bonus-slot-locked"
+			role="listitem"
+			aria-label={`Locked bonus slot for ${setInfo.name} set`}
 			style={{
 				'--book-accent': accent.edge,
 				'--book-glow': accent.glow,
-				'--book-badge': accent.badge,
 			}}
 		>
-			<div class="collection-bonus-badge">Bonus</div>
-			<div class="collection-bonus-set">
-				<span class="collection-bonus-set-emoji">{setInfo.emoji}</span>
-				<span class="collection-bonus-set-name">{setInfo.name}</span>
-			</div>
-			<div class="collection-bonus-mark">{isComplete ? '✨' : '🔒'}</div>
-			<div class="collection-bonus-copy">
-				<strong>{isComplete ? 'Bonus slot unlocked' : 'Bonus slot locked'}</strong>
-				<span>{isComplete ? 'พร้อมสำหรับการ์ดโบนัส' : 'จะปลดล็อกเมื่อชุดนี้ครบ'}</span>
+			<div class="collection-bonus-lock-icon" aria-hidden="true">🔒</div>
+			<div class="collection-slot-emboss" style={embossStyle} aria-hidden="true" />
+			<div class="collection-slot-meta">
+				<span class="collection-slot-id">BONUS</span>
+				<span class="collection-slot-name">{setInfo.name} Set</span>
 			</div>
 		</div>
 	);

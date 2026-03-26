@@ -87,10 +87,8 @@
 	gap: 1.5rem;
 }
 
-.collection-bonus-grid {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
+.collection-book-bonus .collection-book-grid {
+	justify-content: flex-start;
 }
 
 .collection-reset-button {
